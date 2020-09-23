@@ -236,35 +236,35 @@ public class MainActivity extends FragmentActivity {
 
         Node node;
 
-        node = SFTool.createLocalNodeSphere(-1f, -1f, 1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(-1f, -1f, 1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
-        node = SFTool.createLocalNodeSphere(-1f, 1f, 1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(-1f, 1f, 1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
-        node = SFTool.createLocalNodeSphere(1f, 1f, 1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(1f, 1f, 1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
-        node = SFTool.createLocalNodeSphere(1f, -1f, 1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(1f, -1f, 1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
-        node = SFTool.createLocalNodeSphere(-1f, -1f, -1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(-1f, -1f, -1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
-        node = SFTool.createLocalNodeSphere(-1f, 1f, -1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(-1f, 1f, -1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
-        node = SFTool.createLocalNodeSphere(1f, 1f, -1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(1f, 1f, -1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
-        node = SFTool.createLocalNodeSphere(1f, -1f, -1f, 0.1f, SFMaterial.instance.pointMaterial, false);
+        node = SFTool.createLocalNodeSphere(1f, -1f, -1f, 0.01f, SFMaterial.instance.pointMaterial, false);
         node.setParent(anchorNode);
         nodeList.add(node);
 
