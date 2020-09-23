@@ -77,6 +77,8 @@ public class MainActivity extends FragmentActivity {
     private void initCamera() {
         Camera camera = sceneView.getScene().getCamera();
         camera.setWorldPosition(new Vector3(0.0f, 0.0f, 4f));
+        camera.setNearClipPlane(0.1f);
+        camera.setFarClipPlane(10);
     }
 
     private AnchorNode anchorNode;
@@ -91,21 +93,24 @@ public class MainActivity extends FragmentActivity {
             float downY = 0;
 
             boolean isScale = false;
+            float scale = 0;
+
+            float tempDistance = 0;
 
             @Override
             public void onPeekTouch(HitTestResult hitTestResult, MotionEvent motionEvent) {
 
-                if(motionEvent.getPointerCount() == 1) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
 
-                    switch (motionEvent.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
+                        downX = motionEvent.getX();
+                        downY = motionEvent.getY();
 
-                            downX = motionEvent.getX();
-                            downY = motionEvent.getY();
+                        break;
 
-                            break;
+                    case MotionEvent.ACTION_MOVE:
 
-                        case MotionEvent.ACTION_MOVE:
+                        if(motionEvent.getPointerCount() == 1) {
 
                             if(isScale) {
                                 return;
@@ -115,27 +120,62 @@ public class MainActivity extends FragmentActivity {
                                 resetToCenter(sceneView.getWidth(), sceneView.getHeight(), motionEvent.getX(), motionEvent.getY());
                             }
 
-                            break;
+                        }
+                        else if(motionEvent.getPointerCount() == 2) {
 
-                        case MotionEvent.ACTION_UP:
+                            isScale = true;
 
-                            isScale = false;
-                            downX = 0;
-                            downY = 0;
-                            break;
-                    }
+                            // =================== check is plus(zoom in) or minus(zoom out) =====================
+                            float distance = distance(motionEvent);
+                            if(tempDistance == 0) {
+                                tempDistance = distance;
+                                return;
+                            }
 
+                            if(0 == scale) {
+                                scale = anchorNode.getWorldScale().x;
+                            }
+
+                            float screenViewPercent = distance(motionEvent) / sceneView.getWidth();
+
+                            if(distance > tempDistance) {
+                                // plus(zoom in)
+                                scale += screenViewPercent * 0.05f;
+                            }
+                            else if(distance < tempDistance){
+                                // minus(zoom out)
+                                scale -= screenViewPercent * 0.05f;
+                            }
+                            // =================== check is plus(zoom in) or minus(zoom out) =====================
+
+                            // =================== set scale limit ===================
+                            if(scale <= 0.5) {
+                                scale = 0.5f;
+                            }
+                            else if(scale > 4) {
+                                scale = 4;
+                            }
+
+                            anchorNode.setWorldScale(new Vector3(scale, scale, scale));
+                        }
+
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+
+                        if(isScale) {
+                            // scale
+                            scale = 0;
+                            tempDistance = 0;
+                        }
+                        else {
+                            // rotation
+                        }
+
+                        isScale = false;
+
+                        break;
                 }
-                else if(motionEvent.getPointerCount() == 2) {
-
-                    isScale = true;
-
-                    float percentDistance = distance(motionEvent) / sceneView.getWidth();
-                    ILog.iLogDebug(TAG, percentDistance);
-
-                    anchorNode.setWorldScale(new Vector3(percentDistance, percentDistance, percentDistance));
-                }
-
             }
         });
 
