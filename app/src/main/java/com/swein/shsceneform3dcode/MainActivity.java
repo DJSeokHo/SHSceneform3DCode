@@ -124,8 +124,13 @@ public class MainActivity extends FragmentActivity {
                             if (Math.abs(motionEvent.getX() - downX) > 40 || Math.abs(motionEvent.getY() - downY) > 40) {
 
                                 // re-center point
-                                float x = motionEvent.getX() - sceneView.getWidth() * 0.5f;
-                                float y = motionEvent.getY() - sceneView.getHeight() * 0.5f;
+                                // let view center as touch center point
+//                                float x = motionEvent.getX() - sceneView.getWidth() * 0.5f;
+//                                float y = motionEvent.getY() - sceneView.getHeight() * 0.5f;
+
+                                // let touched point as touch center point
+                                float x = motionEvent.getX() - downX;
+                                float y = motionEvent.getY() - downY;
                                 // re-center point
 
                                 float percentX = x / (sceneView.getWidth() * 0.5f);
