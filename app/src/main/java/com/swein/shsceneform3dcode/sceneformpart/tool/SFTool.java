@@ -44,13 +44,6 @@ public class SFTool {
                 .thenAccept(materialCreatedDelegate::onCreated);
     }
 
-    public static void createTransparentColorMaterial(Context context, int color, MaterialCreatedDelegate materialCreatedDelegate) {
-        MaterialFactory
-                .makeTransparentWithColor(context, new Color(color))
-                .thenAccept(materialCreatedDelegate::onCreated);
-
-    }
-
     /**
      * create view render able
      */
@@ -121,15 +114,6 @@ public class SFTool {
         return lineNode;
     }
 
-    public static void removeChildFormNode(Node node) {
-        List<Node> childList = node.getChildren();
-        if(!childList.isEmpty()) {
-            for (int i = childList.size() - 1; i >= 0; i--) {
-                childList.get(i).setParent(null);
-            }
-        }
-    }
-
     public interface SetSegmentSizeTextViewDelegate {
         void onFinish(ViewRenderable viewRenderable, FaceToCameraNode faceToCameraNode);
     }
@@ -192,10 +176,6 @@ public class SFTool {
 
         Vector3 difference = Vector3.subtract(startVector3, endVector3);
         return difference.length();
-    }
-
-    public static AnchorNode createAnchorNode(Anchor anchor) {
-        return new AnchorNode(anchor);
     }
 
     public static SFConstants.SFUnit getUnit(String unit) {
