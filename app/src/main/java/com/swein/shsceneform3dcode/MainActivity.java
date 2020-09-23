@@ -16,7 +16,6 @@ import com.google.ar.sceneform.SceneView;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ViewRenderable;
-import com.swein.shsceneform3dcode.framework.debug.ILog;
 import com.swein.shsceneform3dcode.framework.thread.ThreadUtil;
 import com.swein.shsceneform3dcode.sceneformpart.FaceToCameraNode;
 import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
@@ -83,6 +82,9 @@ public class MainActivity extends FragmentActivity {
 
     private AnchorNode anchorNode;
 
+    private float prevXAngle = 0;
+    private float prevYAngle = 0;
+
     private void initSceneForm() {
 
         sceneView.setBackgroundColor(Color.WHITE);
@@ -97,64 +99,85 @@ public class MainActivity extends FragmentActivity {
 
             float tempDistance = 0;
 
+            float xAngle = 0;
+            float yAngle = 0;
+
             @Override
             public void onPeekTouch(HitTestResult hitTestResult, MotionEvent motionEvent) {
 
                 switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_DOWN: {
 
                         downX = motionEvent.getX();
                         downY = motionEvent.getY();
 
                         break;
-
+                    }
                     case MotionEvent.ACTION_MOVE:
 
-                        if(motionEvent.getPointerCount() == 1) {
+                        if (motionEvent.getPointerCount() == 1) {
 
-                            if(isScale) {
+                            if (isScale) {
                                 return;
                             }
 
-                            if(Math.abs(motionEvent.getX() - downX) > 50 || Math.abs(motionEvent.getY() - downY) > 50) {
-                                resetToCenter(sceneView.getWidth(), sceneView.getHeight(), motionEvent.getX(), motionEvent.getY());
+                            if (Math.abs(motionEvent.getX() - downX) > 40 || Math.abs(motionEvent.getY() - downY) > 40) {
+
+                                // re-center point
+                                float x = motionEvent.getX() - sceneView.getWidth() * 0.5f;
+                                float y = motionEvent.getY() - sceneView.getHeight() * 0.5f;
+                                // re-center point
+
+                                float percentX = x / (sceneView.getWidth() * 0.5f);
+                                float percentY = y / (sceneView.getHeight() * 0.5f);
+
+                                anchorNode.getWorldRotation();
+
+                                xAngle = percentX * 360 * 0.25f + prevXAngle;
+                                yAngle = percentY * 360 * 0.25f + prevYAngle;
+
+                                Quaternion xQuaternion = Quaternion.axisAngle(new Vector3(0.0f, 1.0f, 0.0f), xAngle);
+                                Quaternion yQuaternion = Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), yAngle);
+
+                                anchorNode.setWorldRotation(Quaternion.multiply(xQuaternion, yQuaternion));
                             }
 
                         }
-                        else if(motionEvent.getPointerCount() == 2) {
+                        else if (motionEvent.getPointerCount() == 2) {
 
                             isScale = true;
 
                             // =================== check is plus(zoom in) or minus(zoom out) =====================
                             float distance = distance(motionEvent);
-                            if(tempDistance == 0) {
+                            if (tempDistance == 0) {
                                 tempDistance = distance;
                                 return;
                             }
 
-                            if(0 == scale) {
+                            if (0 == scale) {
                                 scale = anchorNode.getWorldScale().x;
                             }
 
                             float screenViewPercent = distance(motionEvent) / sceneView.getWidth();
 
-                            if(distance > tempDistance) {
+                            if (distance > tempDistance) {
                                 // plus(zoom in)
                                 scale += screenViewPercent * 0.05f;
                             }
-                            else if(distance < tempDistance){
+                            else if (distance < tempDistance) {
                                 // minus(zoom out)
                                 scale -= screenViewPercent * 0.05f;
                             }
                             // =================== check is plus(zoom in) or minus(zoom out) =====================
 
                             // =================== set scale limit ===================
-                            if(scale <= 0.5) {
+                            if (scale <= 0.5) {
                                 scale = 0.5f;
                             }
-                            else if(scale > 4) {
+                            else if (scale > 4) {
                                 scale = 4;
                             }
+                            // =================== set scale limit ===================
 
                             anchorNode.setWorldScale(new Vector3(scale, scale, scale));
                         }
@@ -170,6 +193,8 @@ public class MainActivity extends FragmentActivity {
                         }
                         else {
                             // rotation
+                            prevXAngle = xAngle;
+                            prevYAngle = yAngle;
                         }
 
                         isScale = false;
@@ -184,21 +209,6 @@ public class MainActivity extends FragmentActivity {
         });
     }
 
-    private void resetToCenter(int width, int height, float x, float y) {
-        x = x - width * 0.5f;
-        y = y - height * 0.5f;
-
-        float percentX = x / (width * 0.5f);
-        float percentY = y / (height * 0.5f);
-
-        ILog.iLogDebug(TAG, percentX  + " " + percentY);
-
-
-        Quaternion xQuaternion = Quaternion.axisAngle(new Vector3(0.0f, 1.0f, 0.0f), percentX * 360 * 0.5f);
-        Quaternion yQuaternion = Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), percentY * 360 * 0.5f);
-
-        anchorNode.setWorldRotation(Quaternion.multiply(xQuaternion, yQuaternion));
-    }
 
     private float distance(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
@@ -352,14 +362,14 @@ public class MainActivity extends FragmentActivity {
                     }
                 });
 
-        segmentNode = SFTool.drawSegment(nodeList.get(3), nodeList.get(7), SFMaterial.instance.segmentMaterial, false);
-        SFTool.setSegmentSizeTextView(this, SFTool.getLengthOfTwoNode(nodeList.get(3), nodeList.get(7)), SFConstants.SFUnit.M,
-                segmentNode, new SFTool.SetSegmentSizeTextViewDelegate() {
-                    @Override
-                    public void onFinish(ViewRenderable viewRenderable, FaceToCameraNode faceToCameraNode) {
-
-                    }
-                });
+//        segmentNode = SFTool.drawSegment(nodeList.get(3), nodeList.get(7), SFMaterial.instance.segmentMaterial, false);
+//        SFTool.setSegmentSizeTextView(this, SFTool.getLengthOfTwoNode(nodeList.get(3), nodeList.get(7)), SFConstants.SFUnit.M,
+//                segmentNode, new SFTool.SetSegmentSizeTextViewDelegate() {
+//                    @Override
+//                    public void onFinish(ViewRenderable viewRenderable, FaceToCameraNode faceToCameraNode) {
+//
+//                    }
+//                });
     }
 
     @Override
