@@ -15,20 +15,12 @@ public class SFMaterial {
     public Material pointMaterial;
     public Material segmentMaterial;
 
-    public Material wallPointMaterial;
-    public Material wallSegmentMaterial;
-
     public void init(Context context) {
 
         // create node material
-        SFTool.createColorMaterial(context, Color.GREEN, material -> {
+        SFTool.createColorMaterial(context, Color.BLUE, material -> {
             pointMaterial = material;
             segmentMaterial = material;
-        });
-
-        SFTool.createColorMaterial(context, Color.RED, material -> {
-            wallPointMaterial = material;
-            wallSegmentMaterial = material;
         });
     }
 
