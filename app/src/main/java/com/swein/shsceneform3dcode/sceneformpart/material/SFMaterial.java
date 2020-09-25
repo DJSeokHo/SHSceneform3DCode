@@ -15,12 +15,13 @@ public class SFMaterial {
     public Material pointMaterial;
     public Material segmentMaterial;
 
-    public void init(Context context) {
+    public void init(Context context, Runnable runnable) {
 
         // create node material
         SFTool.createColorMaterial(context, Color.BLUE, material -> {
             pointMaterial = material;
             segmentMaterial = material;
+            runnable.run();
         });
     }
 

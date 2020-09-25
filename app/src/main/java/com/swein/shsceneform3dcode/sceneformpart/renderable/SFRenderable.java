@@ -13,9 +13,10 @@ public class SFRenderable {
 
     public ViewRenderable guideSizeTextView;
 
-    public void init(Context context) {
+    public void init(Context context, Runnable runnable) {
         SFTool.createViewRenderable(context, R.layout.view_renderable_text, viewRenderable -> {
             guideSizeTextView = viewRenderable;
+            runnable.run();
         }, false);
     }
 

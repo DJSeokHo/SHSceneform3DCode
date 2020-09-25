@@ -16,7 +16,6 @@ import com.google.ar.sceneform.SceneView;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.swein.shsceneform3dcode.framework.debug.ILog;
-import com.swein.shsceneform3dcode.framework.thread.ThreadUtil;
 import com.swein.shsceneform3dcode.sceneformpart.bean.RoomBean;
 import com.swein.shsceneform3dcode.sceneformpart.bean.basic.PlaneBean;
 import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
@@ -42,16 +41,16 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
 
         findView();
-        setCameraRange(4f, 0.0001f, 10);
         initSceneForm();
+        setCameraRange(4f, 0.0001f, 10);
 
-        SFMaterial.instance.init(this);
-        SFRenderable.instance.init(this);
+        SFMaterial.instance.init(this, () -> {
+            SFRenderable.instance.init(this, () -> {
 
-        ThreadUtil.startUIThread(1000, () -> {
-            test();
+                createAnchorNode();
+                test();
+            });
         });
-
     }
 
     @Override
@@ -157,7 +156,7 @@ public class MainActivity extends FragmentActivity {
                             isScale = true;
 
                             // =================== check is plus(zoom in) or minus(zoom out) =====================
-                            float distance = distance(motionEvent);
+                            float distance = motionEventDistance(motionEvent);
                             if (tempDistance == 0) {
                                 tempDistance = distance;
                                 return;
@@ -167,7 +166,7 @@ public class MainActivity extends FragmentActivity {
                                 scale = anchorNode.getWorldScale().x;
                             }
 
-                            float screenViewPercent = distance(motionEvent) / sceneView.getWidth();
+                            float screenViewPercent = motionEventDistance(motionEvent) / sceneView.getWidth();
 
                             if (distance > tempDistance) {
                                 // plus(zoom in)
@@ -219,17 +218,13 @@ public class MainActivity extends FragmentActivity {
     }
 
 
-    private float distance(MotionEvent event) {
+    private float motionEventDistance(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
         return (float)Math.sqrt(x * x + y * y);
     }
 
-    private void test() {
-
-        if(SFMaterial.instance.pointMaterial == null || SFMaterial.instance.segmentMaterial == null) {
-            return;
-        }
+    private void createAnchorNode() {
 
         if(anchorNode == null) {
             anchorNode = new AnchorNode();
@@ -237,6 +232,16 @@ public class MainActivity extends FragmentActivity {
 
         anchorNode.setWorldPosition(new Vector3(0f, 0f, 0f));
         anchorNode.setParent(sceneView.getScene());
+
+    }
+
+    private void calculateModellingCenter() {
+
+    }
+
+    private void test() {
+
+
 
 
 
