@@ -55,21 +55,6 @@ public class RoomModel {
             wallObjectPlaneModel = new PlaneModel(wallObjectPlaneBean, anchorNode);
             wallObjectPlaneModelList.add(wallObjectPlaneModel);
         }
-
-//        Node segmentNode;
-//        for(int i = 0; i < roomBean.floor.segmentBeanList.size(); i++) {
-//            segmentNode = SFTool.drawSegment(
-//                    roomBean.floor.segmentBeanList.get(i).startPointBean.point,
-//                    roomBean.floor.segmentBeanList.get(i).endPointBean.point,
-//                    SFMaterial.instance.segmentMaterial, false);
-//
-//            SFTool.setSegmentSizeTextView(view.getContext(),
-//                    MathTool.getLengthOfTwoNode(roomBean.floor.segmentBeanList.get(i).startPointBean.point,
-//                            roomBean.floor.segmentBeanList.get(i).endPointBean.point), SFConstants.SFUnit.M,
-//                    segmentNode, (viewRenderable, faceToCameraNode) -> {
-//
-//                    });
-//        }
     }
 
     public void createSizeSymbol() {

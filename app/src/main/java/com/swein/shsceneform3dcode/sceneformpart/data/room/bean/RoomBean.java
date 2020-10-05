@@ -3,6 +3,7 @@ package com.swein.shsceneform3dcode.sceneformpart.data.room.bean;
 import com.google.ar.sceneform.math.Vector3;
 import com.swein.shsceneform3dcode.framework.parsing.ParsingUtil;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PlaneBean;
+import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PointBean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,6 +45,8 @@ public class RoomBean {
 
     public String name;
     public String unit;
+
+    public PointBean centerPoint;
 
     public RoomBean() {
 
@@ -184,6 +187,21 @@ public class RoomBean {
         name = ParsingUtil.parsingString(jsonObject, "name");
         unit = ParsingUtil.parsingString(jsonObject, "unit");
 
+    }
+
+    public void calculateModelCenterPoint() {
+
+        float tx = 0;
+        float tz = 0;
+        for(int i = 0; i < floorPlaneBean.pointList.size(); i++) {
+            tx += floorPlaneBean.pointList.get(i).x;
+            tz += floorPlaneBean.pointList.get(i).z;
+        }
+
+        centerPoint = new PointBean();
+        centerPoint.x = tx / floorPlaneBean.pointList.size();
+        centerPoint.y = height * 0.5f;
+        centerPoint.z = tz / floorPlaneBean.pointList.size();
     }
 
     public void clear() {

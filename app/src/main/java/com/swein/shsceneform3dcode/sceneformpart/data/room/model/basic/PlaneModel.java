@@ -45,10 +45,6 @@ public class PlaneModel {
         segmentModelList.add(segmentModel);
     }
 
-    public PlaneModel(PlaneBean planeBean, PointBean offsetPoint) {
-
-    }
-
     public void clear() {
 
         for(int i = 0; i < pointModelList.size(); i++) {

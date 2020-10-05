@@ -44,6 +44,7 @@ public class SceneFormViewHolder {
 
         findView();
         initSceneForm();
+
         setCameraPosition(0f, 0f, 4f);
         setCameraRange(0.0001f, 10);
 
@@ -52,7 +53,21 @@ public class SceneFormViewHolder {
 
                 createRoomBean();
                 createAnchorNode();
-                calculateModellingCenter();
+
+                // re set camera
+                float z = roomBean.height;
+                for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
+                    if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
+                        z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
+                    }
+                }
+
+                setCameraPosition(0f, 0f, z * 1.5f);
+                setCameraRange(0.0001f, z * 10f);
+                // re set camera
+
+                RoomBean tempRoomBean = createTempRoomBean(roomBean.centerPoint.x, roomBean.centerPoint.y, roomBean.centerPoint.z);
+                updateView(tempRoomBean);
             });
         });
     }
@@ -220,6 +235,7 @@ public class SceneFormViewHolder {
 
             roomBean = new RoomBean();
             roomBean.init(jsonObject);
+            roomBean.calculateModelCenterPoint();
 
             ILog.iLogDebug(TAG, roomBean.toString());
 
@@ -238,48 +254,6 @@ public class SceneFormViewHolder {
         anchorNode.setWorldPosition(new Vector3(0f, 0f, 0f));
         anchorNode.setParent(sceneView.getScene());
 
-    }
-
-    private void calculateModellingCenter() {
-
-        // get center point of modelling
-
-        float tx = 0;
-        float tz = 0;
-        for(int i = 0; i < roomBean.floorPlaneBean.pointList.size(); i++) {
-            tx += roomBean.floorPlaneBean.pointList.get(i).x;
-            tz += roomBean.floorPlaneBean.pointList.get(i).z;
-        }
-
-        float xAvg = tx / roomBean.floorPlaneBean.pointList.size();
-        float zAvg = tz / roomBean.floorPlaneBean.pointList.size();
-        float yAvg = roomBean.height * 0.5f;
-
-
-        // show center point
-//        Node node = SFTool.createLocalNode(xAvg, yAvg, zAvg, 0.05f, SFMaterial.instance.pointMaterial, false);
-//        node.setParent(anchorNode);
-
-        ILog.iLogDebug(TAG, "center " + xAvg + " " + zAvg);
-
-        // get center point of modelling
-
-
-        // set camera
-        float z = roomBean.height;
-
-        for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
-            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
-                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
-            }
-        }
-
-        setCameraPosition(0f, 0f, z * 1.5f);
-        setCameraRange(0.0001f, z * 10f);
-        // set camera
-
-        RoomBean roomBean = createTempRoomBean(xAvg, yAvg, zAvg);
-        updateView(roomBean);
     }
 
     private RoomBean createTempRoomBean(float xAvg, float yAvg, float zAvg) {
