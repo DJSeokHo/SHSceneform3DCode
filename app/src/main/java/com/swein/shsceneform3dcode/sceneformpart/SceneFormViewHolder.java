@@ -26,6 +26,10 @@ import org.json.JSONObject;
 
 public class SceneFormViewHolder {
 
+    public final static int TYPE_3D = 0;
+    public final static int TYPE_2D = 1;
+    public final static int TYPE_WALL = 2;
+
     private final static String TAG = "SceneFormViewHolder";
 
     public View view;
@@ -37,9 +41,11 @@ public class SceneFormViewHolder {
 
     private String jsonObjectString;
 
-    public SceneFormViewHolder(Context context, String jsonObjectString) {
-        view = ViewUtil.inflateView(context, R.layout.view_holder_scene_form, null);
+    private int type;
 
+    public SceneFormViewHolder(Context context, String jsonObjectString, int type) {
+        view = ViewUtil.inflateView(context, R.layout.view_holder_scene_form, null);
+        this.type = type;
         this.jsonObjectString = jsonObjectString;
 
         findView();
@@ -53,18 +59,6 @@ public class SceneFormViewHolder {
 
                 createRoomBean();
                 createAnchorNode();
-
-                // re set camera
-                float z = roomBean.height;
-                for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
-                    if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
-                        z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
-                    }
-                }
-
-                setCameraPosition(0f, 0f, z * 1.5f);
-                setCameraRange(0.0001f, z * 10f);
-                // re set camera
 
                 RoomBean tempRoomBean = createTempRoomBean(roomBean.centerPoint.x, roomBean.centerPoint.y, roomBean.centerPoint.z);
                 updateView(tempRoomBean);
@@ -124,6 +118,10 @@ public class SceneFormViewHolder {
                     case MotionEvent.ACTION_MOVE:
 
                         if (motionEvent.getPointerCount() == 1) {
+
+                            if(type != TYPE_3D) {
+                                return;
+                            }
 
                             if (isScale) {
                                 return;
@@ -235,7 +233,16 @@ public class SceneFormViewHolder {
 
             roomBean = new RoomBean();
             roomBean.init(jsonObject);
-            roomBean.calculateModelCenterPoint();
+
+            if(type == TYPE_3D) {
+                roomBean.calculate3DModelCenterPoint();
+            }
+            else if(type == TYPE_2D) {
+                roomBean.calculate2DModelCenterPoint();
+            }
+            else if(type == TYPE_WALL) {
+                roomBean.calculateWallCenterPoint();
+            }
 
             ILog.iLogDebug(TAG, roomBean.toString());
 
@@ -267,12 +274,85 @@ public class SceneFormViewHolder {
         return roomBean;
     }
 
-    private void updateView(RoomBean roomBean) {
+    private void updateView(RoomBean tempRoomBean) {
 
-        roomModel = new RoomModel(roomBean);
+        if(type == TYPE_3D) {
+            create3DModel(tempRoomBean);
+        }
+        else if(type == TYPE_2D) {
+            create2DModel(tempRoomBean);
+        }
+        else if(type == TYPE_WALL) {
+            createWallModel(tempRoomBean);
+        }
+
+    }
+
+    private void create3DModel(RoomBean tempRoomBean) {
+
+        // re set camera
+        float z = roomBean.height;
+        for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
+            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
+                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
+            }
+        }
+
+        setCameraPosition(0f, 0f, z * 1.5f);
+        setCameraRange(0.0001f, z * 10f);
+        // re set camera
+
+
+        roomModel = new RoomModel(tempRoomBean);
         roomModel.context = view.getContext();
-        roomModel.createRoom(anchorNode);
-        roomModel.createSizeSymbol();
+        roomModel.create3DModel(anchorNode);
+        roomModel.create3DSizeSymbol();
+    }
+
+    private void create2DModel(RoomBean tempRoomBean) {
+
+        // re set camera
+        float z = roomBean.height;
+        for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
+            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
+                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
+            }
+        }
+
+        setCameraPosition(0f, 0f, z * 0.8f);
+        setCameraRange(0.0001f, z * 10f);
+        // re set camera
+
+        roomModel = new RoomModel(tempRoomBean);
+        roomModel.context = view.getContext();
+        roomModel.create2DModel(anchorNode);
+        roomModel.create2DModelSizeSymbol();
+
+        // rotate model
+        Quaternion xQuaternion = Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), 90);
+        anchorNode.setWorldRotation(xQuaternion);
+    }
+
+    private void createWallModel(RoomBean tempRoomBean) {
+
+        // re set camera
+        float z = roomBean.height;
+        for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
+            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
+                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
+            }
+        }
+
+        setCameraPosition(0f, 0f, z * 1.5f);
+        setCameraRange(0.0001f, z * 10f);
+        // re set camera
+
+
+        roomModel = new RoomModel(tempRoomBean);
+        roomModel.context = view.getContext();
+        roomModel.createWallModel(anchorNode);
+        roomModel.createWallModelSizeSymbol();
+
     }
 
     public void pause() {

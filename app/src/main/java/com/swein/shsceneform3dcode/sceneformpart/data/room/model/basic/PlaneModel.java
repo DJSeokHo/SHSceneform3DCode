@@ -2,7 +2,6 @@ package com.swein.shsceneform3dcode.sceneformpart.data.room.model.basic;
 
 import com.google.ar.sceneform.AnchorNode;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PlaneBean;
-import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PointBean;
 import com.swein.shsceneform3dcode.sceneformpart.material.SFMaterial;
 import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
 import com.swein.shsceneform3dcode.sceneformpart.tool.SFTool;
@@ -15,17 +14,24 @@ public class PlaneModel {
     public List<PointModel> pointModelList = new ArrayList<>();
     public List<SegmentModel> segmentModelList = new ArrayList<>();
 
-    public PlaneModel(PlaneBean planeBean, AnchorNode anchorNode) {
+    public PlaneModel(PlaneBean planeBean) {
 
         PointModel pointModel;
         for(int i = 0; i < planeBean.pointList.size(); i++) {
             pointModel = new PointModel(planeBean.pointList.get(i));
-            pointModel.pointNode.setParent(anchorNode);
             pointModelList.add(pointModel);
         }
 
+    }
+
+    public void drawPlane(AnchorNode anchorNode) {
+
         if(pointModelList.size() < 2) {
             return;
+        }
+
+        for(int i = 0; i < pointModelList.size(); i++) {
+            pointModelList.get(i).pointNode.setParent(anchorNode);
         }
 
         SegmentModel segmentModel;
@@ -39,10 +45,11 @@ public class PlaneModel {
         }
 
         segmentModel = new SegmentModel(
-                SFTool.drawSegment(pointModelList.get(planeBean.pointList.size() - 1).pointNode, pointModelList.get(0).pointNode, SFMaterial.instance.segmentMaterial, false),
-                MathTool.getLengthOfTwoNode(pointModelList.get(planeBean.pointList.size() - 1).pointNode, pointModelList.get(0).pointNode)
+                SFTool.drawSegment(pointModelList.get(pointModelList.size() - 1).pointNode, pointModelList.get(0).pointNode, SFMaterial.instance.segmentMaterial, false),
+                MathTool.getLengthOfTwoNode(pointModelList.get(pointModelList.size() - 1).pointNode, pointModelList.get(0).pointNode)
         );
         segmentModelList.add(segmentModel);
+
     }
 
     public void clear() {

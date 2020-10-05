@@ -11,8 +11,12 @@ public class MainActivity extends FragmentActivity {
 
     private final static String TAG = "MainActivity";
 
-    private FrameLayout frameLayout;
-    private SceneFormViewHolder sceneFormViewHolder;
+    private FrameLayout frameLayout1;
+    private FrameLayout frameLayout2;
+    private FrameLayout frameLayout3;
+    private SceneFormViewHolder sceneFormViewHolder3D;
+    private SceneFormViewHolder sceneFormViewHolder2D;
+    private SceneFormViewHolder sceneFormViewHolderWall;
 
     private String jsonObjectString;
 
@@ -29,9 +33,18 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onPause() {
-        if(sceneFormViewHolder != null) {
-            sceneFormViewHolder.pause();
+        if(sceneFormViewHolder3D != null) {
+            sceneFormViewHolder3D.pause();
         }
+
+        if(sceneFormViewHolder2D != null) {
+            sceneFormViewHolder2D.pause();
+        }
+
+        if(sceneFormViewHolderWall != null) {
+            sceneFormViewHolderWall.pause();
+        }
+
         super.onPause();
     }
 
@@ -39,28 +52,54 @@ public class MainActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
 
-        if(sceneFormViewHolder != null) {
-            sceneFormViewHolder.resume();
+        if(sceneFormViewHolder3D != null) {
+            sceneFormViewHolder3D.resume();
+        }
+
+        if(sceneFormViewHolder2D != null) {
+            sceneFormViewHolder2D.resume();
+        }
+
+        if(sceneFormViewHolderWall != null) {
+            sceneFormViewHolderWall.resume();
         }
     }
 
     private void findView() {
-        frameLayout = findViewById(R.id.frameLayout);
+        frameLayout1 = findViewById(R.id.frameLayout1);
+        frameLayout2 = findViewById(R.id.frameLayout2);
+        frameLayout3 = findViewById(R.id.frameLayout3);
     }
 
     private void initSceneForm() {
 
+        sceneFormViewHolder3D = new SceneFormViewHolder(this, jsonObjectString, SceneFormViewHolder.TYPE_3D);
+        frameLayout1.addView(sceneFormViewHolder3D.view);
 
-        sceneFormViewHolder = new SceneFormViewHolder(this, jsonObjectString);
-        frameLayout.addView(sceneFormViewHolder.view);
+        sceneFormViewHolder2D = new SceneFormViewHolder(this, jsonObjectString, SceneFormViewHolder.TYPE_2D);
+        frameLayout2.addView(sceneFormViewHolder2D.view);
+
+        sceneFormViewHolderWall = new SceneFormViewHolder(this, jsonObjectString, SceneFormViewHolder.TYPE_WALL);
+        frameLayout3.addView(sceneFormViewHolderWall.view);
     }
 
     @Override
     protected void onDestroy() {
 
-        if(sceneFormViewHolder != null) {
-            sceneFormViewHolder.destroy();
-            sceneFormViewHolder = null;
+        if(sceneFormViewHolder3D != null) {
+            sceneFormViewHolder3D.destroy();
+            sceneFormViewHolder3D = null;
+        }
+
+        if(sceneFormViewHolder2D != null) {
+            sceneFormViewHolder2D.destroy();
+            sceneFormViewHolder2D = null;
+        }
+
+
+        if(sceneFormViewHolderWall != null) {
+            sceneFormViewHolderWall.destroy();
+            sceneFormViewHolderWall = null;
         }
         super.onDestroy();
     }

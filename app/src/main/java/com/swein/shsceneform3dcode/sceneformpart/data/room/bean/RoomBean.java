@@ -189,7 +189,7 @@ public class RoomBean {
 
     }
 
-    public void calculateModelCenterPoint() {
+    public void calculate3DModelCenterPoint() {
 
         float tx = 0;
         float tz = 0;
@@ -202,6 +202,34 @@ public class RoomBean {
         centerPoint.x = tx / floorPlaneBean.pointList.size();
         centerPoint.y = height * 0.5f;
         centerPoint.z = tz / floorPlaneBean.pointList.size();
+    }
+
+    public void calculate2DModelCenterPoint() {
+
+        float tx = 0;
+        float tz = 0;
+        for(int i = 0; i < floorPlaneBean.pointList.size(); i++) {
+            tx += floorPlaneBean.pointList.get(i).x;
+            tz += floorPlaneBean.pointList.get(i).z;
+        }
+
+        centerPoint = new PointBean();
+        centerPoint.x = tx / floorPlaneBean.pointList.size();
+        centerPoint.y = 0;
+        centerPoint.z = tz / floorPlaneBean.pointList.size();
+    }
+
+    public void calculateWallCenterPoint() {
+
+        float length = 0;
+        for(int i = 0; i < floorPlaneBean.segmentBeanList.size(); i++) {
+            length += floorPlaneBean.segmentBeanList.get(i).length;
+        }
+
+        centerPoint = new PointBean();
+        centerPoint.x = length * 0.5f;
+        centerPoint.y = height * 0.5f;
+        centerPoint.z = 0;
     }
 
     public void clear() {

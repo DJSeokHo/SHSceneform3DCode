@@ -3,16 +3,21 @@ package com.swein.shsceneform3dcode.sceneformpart.data.room.model;
 import android.content.Context;
 
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.math.Vector3;
+import com.swein.shsceneform3dcode.framework.debug.ILog;
+import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PlaneBean;
-import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.model.basic.PlaneModel;
+import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
 import com.swein.shsceneform3dcode.sceneformpart.tool.SFTool;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoomModel {
+
+    private final static String TAG = "RoomModel";
 
     public RoomBean roomBean;
 
@@ -34,30 +39,92 @@ public class RoomModel {
         this.roomBean = roomBean;
     }
 
-    public void createRoom(AnchorNode anchorNode) {
+    public void createWallModel(AnchorNode anchorNode) {
 
-        // draw floor
-        floorPlaneModel = new PlaneModel(roomBean.floorPlaneBean, anchorNode);
-
-        // draw ceiling
-        ceilingPlaneModel = new PlaneModel(roomBean.ceilingPlaneBean, anchorNode);
+        // check object in which wall and get index
 
         // draw wall
         PlaneModel wallPlaneModel;
         for(PlaneBean wallPlaneBean : roomBean.wallList) {
-            wallPlaneModel = new PlaneModel(wallPlaneBean, anchorNode);
+            wallPlaneModel = new PlaneModel(wallPlaneBean);
             wallPlaneModelList.add(wallPlaneModel);
         }
 
         // draw wall object
         PlaneModel wallObjectPlaneModel;
         for(PlaneBean wallObjectPlaneBean : roomBean.wallObjectList) {
-            wallObjectPlaneModel = new PlaneModel(wallObjectPlaneBean, anchorNode);
+            wallObjectPlaneModel = new PlaneModel(wallObjectPlaneBean);
+            wallObjectPlaneModelList.add(wallObjectPlaneModel);
+        }
+
+        List<Vector3> list = new ArrayList<>();
+        for(int j = 0; j < wallPlaneModelList.size(); j++) {
+            list.clear();
+            ILog.iLogDebug(TAG, "check wall " + j);
+            for(int k = 0; k < wallPlaneModelList.get(j).pointModelList.size(); k++) {
+                list.add(wallPlaneModelList.get(j).pointModelList.get(k).pointNode.getLocalPosition());
+            }
+            ILog.iLogDebug(TAG, "wall size is " + list.size());
+
+            for(int i = 0; i < wallObjectPlaneModelList.size(); i++) {
+                ILog.iLogDebug(TAG, "check wall object " + i);
+                if(MathTool.checkIsVectorInPolygon(wallObjectPlaneModelList.get(i).pointModelList.get(1).pointNode.getLocalPosition(), list)) {
+                    ILog.iLogDebug(TAG, "index is " + j);
+                }
+            }
+        }
+
+    }
+
+    public void createWallModelSizeSymbol() {
+
+    }
+
+    public void create2DModel(AnchorNode anchorNode) {
+        // draw floor
+        floorPlaneModel = new PlaneModel(roomBean.floorPlaneBean);
+        floorPlaneModel.drawPlane(anchorNode);
+    }
+
+    public void create2DModelSizeSymbol() {
+        // ceiling
+        for(int i = 0; i < floorPlaneModel.segmentModelList.size(); i++) {
+            SFTool.setSegmentSizeTextView(context,
+                    floorPlaneModel.segmentModelList.get(i).length, SFConstants.SFUnit.M,
+                    floorPlaneModel.segmentModelList.get(i).segmentNode, (viewRenderable, faceToCameraNode) -> {
+
+                    });
+        }
+    }
+
+    public void create3DModel(AnchorNode anchorNode) {
+
+        // draw floor
+        floorPlaneModel = new PlaneModel(roomBean.floorPlaneBean);
+        floorPlaneModel.drawPlane(anchorNode);
+
+        // draw ceiling
+        ceilingPlaneModel = new PlaneModel(roomBean.ceilingPlaneBean);
+        ceilingPlaneModel.drawPlane(anchorNode);
+
+        // draw wall
+        PlaneModel wallPlaneModel;
+        for(PlaneBean wallPlaneBean : roomBean.wallList) {
+            wallPlaneModel = new PlaneModel(wallPlaneBean);
+            wallPlaneModel.drawPlane(anchorNode);
+            wallPlaneModelList.add(wallPlaneModel);
+        }
+
+        // draw wall object
+        PlaneModel wallObjectPlaneModel;
+        for(PlaneBean wallObjectPlaneBean : roomBean.wallObjectList) {
+            wallObjectPlaneModel = new PlaneModel(wallObjectPlaneBean);
+            wallObjectPlaneModel.drawPlane(anchorNode);
             wallObjectPlaneModelList.add(wallObjectPlaneModel);
         }
     }
 
-    public void createSizeSymbol() {
+    public void create3DSizeSymbol() {
 
         // ceiling
         for(int i = 0; i < ceilingPlaneModel.segmentModelList.size(); i++) {
