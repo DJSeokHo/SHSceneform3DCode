@@ -1,7 +1,6 @@
-package com.swein.shsceneform3dcode.sceneformpart.bean.basic;
+package com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic;
 
 import com.swein.shsceneform3dcode.framework.parsing.ParsingUtil;
-import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,37 +12,14 @@ import java.util.List;
 public class PlaneBean {
 
     public List<PointBean> pointList = new ArrayList<>();
-    public List<SegmentBean> segmentList = new ArrayList<>();
+    public List<SegmentBean> segmentBeanList = new ArrayList<>();
 
     public String type;
 
     public PlaneBean() {
         pointList.clear();
-        segmentList.clear();
+        segmentBeanList.clear();
         type = "";
-    }
-
-    public void createSegment() {
-
-        if(pointList.size() < 2) {
-            return;
-        }
-
-        segmentList.clear();
-
-        SegmentBean segmentBean;
-        for(int i = 0; i < pointList.size() - 1; i++) {
-            segmentBean = new SegmentBean();
-            segmentBean.startPoint = pointList.get(i);
-            segmentBean.endPoint = pointList.get(i + 1);
-            segmentBean.length = MathTool.getLengthOfTwoNode(segmentBean.startPoint.point, segmentBean.endPoint.point);
-            segmentList.add(segmentBean);
-        }
-        segmentBean = new SegmentBean();
-        segmentBean.startPoint = pointList.get(pointList.size() - 1);
-        segmentBean.endPoint = pointList.get(0);
-        segmentBean.length = MathTool.getLengthOfTwoNode(segmentBean.startPoint.point, segmentBean.endPoint.point);
-        segmentList.add(segmentBean);
     }
 
     public void clear() {
@@ -53,10 +29,10 @@ public class PlaneBean {
         }
         pointList.clear();
 
-        for(int i = 0; i < segmentList.size() - 1; i++) {
-            segmentList.get(i).clear();
+        for(int i = 0; i < segmentBeanList.size() - 1; i++) {
+            segmentBeanList.get(i).clear();
         }
-        segmentList.clear();
+        segmentBeanList.clear();
 
         type = "";
     }
@@ -71,8 +47,8 @@ public class PlaneBean {
         jsonObject.put("pointArray", pointArray);
 
         JSONArray segmentArray = new JSONArray();
-        for(int i = 0; i < segmentList.size(); i++) {
-            segmentArray.put(segmentList.get(i).toJSONObject());
+        for(int i = 0; i < segmentBeanList.size(); i++) {
+            segmentArray.put(segmentBeanList.get(i).toJSONObject());
         }
         jsonObject.put("segmentArray", segmentArray);
 
@@ -96,7 +72,7 @@ public class PlaneBean {
         for(int i = 0; i < segmentArray.length(); i++) {
             segmentBean = new SegmentBean();
             segmentBean.init(segmentArray.getJSONObject(i));
-            segmentList.add(segmentBean);
+            segmentBeanList.add(segmentBean);
         }
 
         type = jsonObject.getString("type");
@@ -118,7 +94,7 @@ public class PlaneBean {
         for(int i = 0; i < segmentArray.length(); i++) {
             segmentBean = new SegmentBean();
             segmentBean.init(segmentArray.getJSONObject(i), cx, cy, cz);
-            segmentList.add(segmentBean);
+            segmentBeanList.add(segmentBean);
         }
 
         type = jsonObject.getString("type");

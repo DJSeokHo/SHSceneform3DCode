@@ -1,10 +1,8 @@
-package com.swein.shsceneform3dcode.sceneformpart.bean;
+package com.swein.shsceneform3dcode.sceneformpart.data.room.bean;
 
-import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.swein.shsceneform3dcode.framework.parsing.ParsingUtil;
-import com.swein.shsceneform3dcode.sceneformpart.bean.basic.PlaneBean;
-import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
+import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PlaneBean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,16 +16,14 @@ import java.util.List;
  */
 public class RoomBean {
 
-    private final static String TAG = "RoomBean";
-
     // normal vector of floor
     public Vector3 normalVectorOfPlane;
 
     // floor
-    public PlaneBean floor;
+    public PlaneBean floorPlaneBean;
 
     // ceiling
-    public PlaneBean ceiling;
+    public PlaneBean ceilingPlaneBean;
 
     // room wall
     public List<PlaneBean> wallList = new ArrayList<>();
@@ -53,8 +49,8 @@ public class RoomBean {
 
         normalVectorOfPlane = new Vector3();
 
-        floor = new PlaneBean();
-        ceiling = new PlaneBean();
+        floorPlaneBean = new PlaneBean();
+        ceilingPlaneBean = new PlaneBean();
         wallList.clear();
         wallObjectList.clear();
 
@@ -70,72 +66,6 @@ public class RoomBean {
         unit = "";
     }
 
-    public void calculate() {
-
-        // 둘레 m
-        circumference = 0;
-        for(int i = 0; i < floor.segmentList.size(); i++) {
-            circumference += floor.segmentList.get(i).length;
-        }
-
-        // 벽 면적 m2
-        wallArea = 0;
-        for(int i = 0; i < floor.segmentList.size(); i++) {
-//            wallArea += MathTool.getLengthByUnit(ARConstants.arUnit, floor.segmentList.get(i).length) * MathTool.getLengthByUnit(ARConstants.arUnit, height);
-            wallArea += floor.segmentList.get(i).length * height;
-        }
-
-        // 면적 m2
-        List<Node> list = new ArrayList<>();
-        for(int i = 0; i < floor.pointList.size(); i++) {
-            list.add(floor.pointList.get(i).point);
-        }
-//        area = MathTool.getAreaByUnit(ARConstants.arUnit, MathTool.calculateArea(list, normalVectorOfPlane));
-        area = MathTool.calculateArea(list, normalVectorOfPlane);
-
-        // 체적 m3
-//        volume = MathTool.getLengthByUnit(ARConstants.arUnit, height) * area;
-        volume = height * area;
-    }
-
-    public void clear() {
-
-        for(int i = 0; i < wallObjectList.size(); i++) {
-            wallObjectList.get(i).clear();
-        }
-        wallObjectList.clear();
-
-
-        for(int i = 0; i < wallList.size(); i++) {
-            wallList.get(i).clear();
-        }
-        wallList.clear();
-
-
-        if(ceiling != null) {
-            ceiling.clear();
-            ceiling = null;
-        }
-
-        if(floor != null) {
-            floor.clear();
-            floor = null;
-        }
-
-        normalVectorOfPlane = null;
-
-        height = 0;
-        floorFixedY = 0;
-
-        area = 0;
-        circumference = 0;
-        wallArea = 0;
-        volume = 0;
-
-        name = null;
-        unit = null;
-    }
-
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
@@ -143,8 +73,8 @@ public class RoomBean {
         jsonObject.put("normalVectorOfPlaneY", String.valueOf(normalVectorOfPlane.y));
         jsonObject.put("normalVectorOfPlaneZ", String.valueOf(normalVectorOfPlane.z));
 
-        jsonObject.put("floor", floor.toJSONObject());
-        jsonObject.put("ceiling", ceiling.toJSONObject());
+        jsonObject.put("floor", floorPlaneBean.toJSONObject());
+        jsonObject.put("ceiling", ceilingPlaneBean.toJSONObject());
 
         JSONArray wallArray = new JSONArray();
         for(int i = 0; i < wallList.size(); i++) {
@@ -180,10 +110,10 @@ public class RoomBean {
         normalVectorOfPlane.set(new Vector3(normalVectorOfPlaneX, normalVectorOfPlaneY, normalVectorOfPlaneZ));
 
         JSONObject floorObject = ParsingUtil.parsingJSONObject(jsonObject, "floor");
-        floor.init(floorObject);
+        floorPlaneBean.init(floorObject);
 
         JSONObject ceilingObject = ParsingUtil.parsingJSONObject(jsonObject, "ceiling");
-        ceiling.init(ceilingObject);
+        ceilingPlaneBean.init(ceilingObject);
 
         JSONArray wallArray = ParsingUtil.parsingJSONArray(jsonObject, "wallArray");
 
@@ -222,10 +152,10 @@ public class RoomBean {
         normalVectorOfPlane.set(new Vector3(normalVectorOfPlaneX, normalVectorOfPlaneY, normalVectorOfPlaneZ));
 
         JSONObject floorObject = ParsingUtil.parsingJSONObject(jsonObject, "floor");
-        floor.init(floorObject, cx, cy, cz);
+        floorPlaneBean.init(floorObject, cx, cy, cz);
 
         JSONObject ceilingObject = ParsingUtil.parsingJSONObject(jsonObject, "ceiling");
-        ceiling.init(ceilingObject, cx, cy, cz);
+        ceilingPlaneBean.init(ceilingObject, cx, cy, cz);
 
         JSONArray wallArray = ParsingUtil.parsingJSONArray(jsonObject, "wallArray");
 
@@ -256,4 +186,41 @@ public class RoomBean {
 
     }
 
+    public void clear() {
+
+        for(int i = 0; i < wallObjectList.size(); i++) {
+            wallObjectList.get(i).clear();
+        }
+        wallObjectList.clear();
+
+
+        for(int i = 0; i < wallList.size(); i++) {
+            wallList.get(i).clear();
+        }
+        wallList.clear();
+
+
+        if(ceilingPlaneBean != null) {
+            ceilingPlaneBean.clear();
+            ceilingPlaneBean = null;
+        }
+
+        if(floorPlaneBean != null) {
+            floorPlaneBean.clear();
+            floorPlaneBean = null;
+        }
+
+        normalVectorOfPlane = null;
+
+        height = 0;
+        floorFixedY = 0;
+
+        area = 0;
+        circumference = 0;
+        wallArea = 0;
+        volume = 0;
+
+        name = null;
+        unit = null;
+    }
 }

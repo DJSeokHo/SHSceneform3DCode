@@ -69,7 +69,7 @@ public class SFTool {
         Vector3 directionFromTopToBottom = difference.normalized();
         Quaternion rotationFromAToB = Quaternion.lookRotation(directionFromTopToBottom, Vector3.up());
 
-        ModelRenderable lineModelRenderable = ShapeFactory.makeCube(new Vector3(0.02f, 0.02f, difference.length()), Vector3.zero(), lineMaterial);
+        ModelRenderable lineModelRenderable = ShapeFactory.makeCube(new Vector3(0.01f, 0.01f, difference.length()), Vector3.zero(), lineMaterial);
         lineModelRenderable.setShadowCaster(shadow);
         lineModelRenderable.setShadowReceiver(shadow);
 

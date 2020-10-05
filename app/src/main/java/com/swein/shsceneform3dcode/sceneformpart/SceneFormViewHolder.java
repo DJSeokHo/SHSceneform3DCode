@@ -9,7 +9,6 @@ import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.Camera;
 import com.google.ar.sceneform.HitTestResult;
-import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.Scene;
 import com.google.ar.sceneform.SceneView;
 import com.google.ar.sceneform.math.Quaternion;
@@ -17,13 +16,10 @@ import com.google.ar.sceneform.math.Vector3;
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.framework.debug.ILog;
 import com.swein.shsceneform3dcode.framework.util.view.ViewUtil;
-import com.swein.shsceneform3dcode.sceneformpart.bean.RoomBean;
-import com.swein.shsceneform3dcode.sceneformpart.bean.basic.PlaneBean;
-import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
+import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 import com.swein.shsceneform3dcode.sceneformpart.material.SFMaterial;
+import com.swein.shsceneform3dcode.sceneformpart.data.room.model.RoomModel;
 import com.swein.shsceneform3dcode.sceneformpart.renderable.SFRenderable;
-import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
-import com.swein.shsceneform3dcode.sceneformpart.tool.SFTool;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +33,7 @@ public class SceneFormViewHolder {
     private SceneView sceneView;
 
     private RoomBean roomBean;
+    private RoomModel roomModel;
 
     private String jsonObjectString;
 
@@ -249,13 +246,13 @@ public class SceneFormViewHolder {
 
         float tx = 0;
         float tz = 0;
-        for(int i = 0; i < roomBean.floor.pointList.size(); i++) {
-            tx += roomBean.floor.pointList.get(i).point.getLocalPosition().x;
-            tz += roomBean.floor.pointList.get(i).point.getLocalPosition().z;
+        for(int i = 0; i < roomBean.floorPlaneBean.pointList.size(); i++) {
+            tx += roomBean.floorPlaneBean.pointList.get(i).x;
+            tz += roomBean.floorPlaneBean.pointList.get(i).z;
         }
 
-        float xAvg = tx / roomBean.floor.pointList.size();
-        float zAvg = tz / roomBean.floor.pointList.size();
+        float xAvg = tx / roomBean.floorPlaneBean.pointList.size();
+        float zAvg = tz / roomBean.floorPlaneBean.pointList.size();
         float yAvg = roomBean.height * 0.5f;
 
 
@@ -271,9 +268,9 @@ public class SceneFormViewHolder {
         // set camera
         float z = roomBean.height;
 
-        for(int i = 0; i < roomBean.floor.segmentList.size(); i++) {
-            if(roomBean.floor.segmentList.get(i).length > z) {
-                z = roomBean.floor.segmentList.get(i).length;
+        for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
+            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
+                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
             }
         }
 
@@ -298,91 +295,10 @@ public class SceneFormViewHolder {
 
     private void updateView(RoomBean roomBean) {
 
-        roomBean.floor.createSegment();
-        for(int i = 0; i < roomBean.floor.pointList.size(); i++) {
-            roomBean.floor.pointList.get(i).point.setParent(anchorNode);
-        }
-
-        roomBean.ceiling.createSegment();
-        for(int i = 0; i < roomBean.ceiling.pointList.size(); i++) {
-            roomBean.ceiling.pointList.get(i).point.setParent(anchorNode);
-        }
-
-        Node segmentNode;
-        for(int i = 0; i < roomBean.floor.segmentList.size(); i++) {
-            segmentNode = SFTool.drawSegment(
-                    roomBean.floor.segmentList.get(i).startPoint.point,
-                    roomBean.floor.segmentList.get(i).endPoint.point,
-                    SFMaterial.instance.segmentMaterial, false);
-
-            SFTool.setSegmentSizeTextView(view.getContext(),
-                    MathTool.getLengthOfTwoNode(roomBean.floor.segmentList.get(i).startPoint.point,
-                            roomBean.floor.segmentList.get(i).endPoint.point), SFConstants.SFUnit.M,
-                    segmentNode, (viewRenderable, faceToCameraNode) -> {
-
-                    });
-        }
-
-        for(int i = 0; i < roomBean.ceiling.segmentList.size(); i++) {
-            segmentNode = SFTool.drawSegment(
-                    roomBean.ceiling.segmentList.get(i).startPoint.point,
-                    roomBean.ceiling.segmentList.get(i).endPoint.point,
-                    SFMaterial.instance.segmentMaterial, false);
-
-            SFTool.setSegmentSizeTextView(view.getContext(),
-                    MathTool.getLengthOfTwoNode(roomBean.ceiling.segmentList.get(i).startPoint.point,
-                            roomBean.ceiling.segmentList.get(i).endPoint.point), SFConstants.SFUnit.M,
-                    segmentNode, (viewRenderable, faceToCameraNode) -> {
-
-                    });
-        }
-
-        for(PlaneBean planeBean : roomBean.wallList) {
-
-            for(int i = 0; i < planeBean.pointList.size(); i++) {
-                planeBean.pointList.get(i).point.setParent(anchorNode);
-            }
-
-            planeBean.createSegment();
-
-            for(int i = 0; i < planeBean.segmentList.size(); i++) {
-                segmentNode = SFTool.drawSegment(
-                        planeBean.segmentList.get(i).startPoint.point,
-                        planeBean.segmentList.get(i).endPoint.point,
-                        SFMaterial.instance.segmentMaterial, false);
-
-                SFTool.setSegmentSizeTextView(view.getContext(),
-                        MathTool.getLengthOfTwoNode(planeBean.segmentList.get(i).startPoint.point,
-                                planeBean.segmentList.get(i).endPoint.point), SFConstants.SFUnit.M,
-                        segmentNode, (viewRenderable, faceToCameraNode) -> {
-
-                        });
-            }
-        }
-
-
-        for(PlaneBean planeBean : roomBean.wallObjectList) {
-
-            for(int i = 0; i < planeBean.pointList.size(); i++) {
-                planeBean.pointList.get(i).point.setParent(anchorNode);
-            }
-
-            planeBean.createSegment();
-
-            for(int i = 0; i < planeBean.segmentList.size(); i++) {
-                segmentNode = SFTool.drawSegment(
-                        planeBean.segmentList.get(i).startPoint.point,
-                        planeBean.segmentList.get(i).endPoint.point,
-                        SFMaterial.instance.segmentMaterial, false);
-
-                SFTool.setSegmentSizeTextView(view.getContext(),
-                        MathTool.getLengthOfTwoNode(planeBean.segmentList.get(i).startPoint.point,
-                                planeBean.segmentList.get(i).endPoint.point), SFConstants.SFUnit.M,
-                        segmentNode, (viewRenderable, faceToCameraNode) -> {
-
-                        });
-            }
-        }
+        roomModel = new RoomModel(roomBean);
+        roomModel.context = view.getContext();
+        roomModel.createRoom(anchorNode);
+        roomModel.createSizeSymbol();
     }
 
     public void pause() {
@@ -400,6 +316,11 @@ public class SceneFormViewHolder {
 
     public void destroy() {
 
+        if(roomModel != null) {
+            roomModel.destroy();
+            roomModel = null;
+        }
+
         if(roomBean != null) {
             roomBean.clear();
             roomBean = null;
@@ -408,6 +329,5 @@ public class SceneFormViewHolder {
         SFMaterial.instance.destroy();
         SFRenderable.instance.destroy();
         sceneView.destroy();
-
     }
 }
