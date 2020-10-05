@@ -3,13 +3,12 @@ package com.swein.shsceneform3dcode.sceneformpart.data.room.model;
 import android.content.Context;
 
 import com.google.ar.sceneform.AnchorNode;
-import com.google.ar.sceneform.math.Vector3;
-import com.swein.shsceneform3dcode.framework.debug.ILog;
 import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PlaneBean;
+import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PointBean;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.model.basic.PlaneModel;
-import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
+import com.swein.shsceneform3dcode.sceneformpart.data.room.model.basic.PointModel;
 import com.swein.shsceneform3dcode.sceneformpart.tool.SFTool;
 
 import java.util.ArrayList;
@@ -41,39 +40,120 @@ public class RoomModel {
 
     public void createWallModel(AnchorNode anchorNode) {
 
-        // check object in which wall and get index
+        List<PlaneModel> list = new ArrayList<>();
 
-        // draw wall
-        PlaneModel wallPlaneModel;
-        for(PlaneBean wallPlaneBean : roomBean.wallList) {
-            wallPlaneModel = new PlaneModel(wallPlaneBean);
-            wallPlaneModelList.add(wallPlaneModel);
-        }
+        // create start wall
+        PlaneModel planeModel = new PlaneModel();
 
-        // draw wall object
-        PlaneModel wallObjectPlaneModel;
-        for(PlaneBean wallObjectPlaneBean : roomBean.wallObjectList) {
-            wallObjectPlaneModel = new PlaneModel(wallObjectPlaneBean);
-            wallObjectPlaneModelList.add(wallObjectPlaneModel);
-        }
+        // bottom left
+        PointBean pointBean = new PointBean();
+        pointBean.x = 0;
+        pointBean.y = 0;
+        pointBean.z = 0;
+        PointModel pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
 
-        List<Vector3> list = new ArrayList<>();
-        for(int j = 0; j < wallPlaneModelList.size(); j++) {
-            list.clear();
-            ILog.iLogDebug(TAG, "check wall " + j);
-            for(int k = 0; k < wallPlaneModelList.get(j).pointModelList.size(); k++) {
-                list.add(wallPlaneModelList.get(j).pointModelList.get(k).pointNode.getLocalPosition());
-            }
-            ILog.iLogDebug(TAG, "wall size is " + list.size());
+        // bottom right
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length;
+        pointBean.y = 0;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
 
-            for(int i = 0; i < wallObjectPlaneModelList.size(); i++) {
-                ILog.iLogDebug(TAG, "check wall object " + i);
-                if(MathTool.checkIsVectorInPolygon(wallObjectPlaneModelList.get(i).pointModelList.get(1).pointNode.getLocalPosition(), list)) {
-                    ILog.iLogDebug(TAG, "index is " + j);
-                }
-            }
-        }
+        // top right
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length;
+        pointBean.y = roomBean.height;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
 
+        // top left
+        pointBean = new PointBean();
+        pointBean.x = 0;
+        pointBean.y = roomBean.height;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        planeModel.drawPlane(anchorNode);
+        list.add(planeModel);
+
+
+        planeModel = new PlaneModel();
+
+        // bottom left
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length;
+        pointBean.y = 0;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        // bottom right
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length + roomBean.floorPlaneBean.segmentBeanList.get(1).length;
+        pointBean.y = 0;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        // top right
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length + roomBean.floorPlaneBean.segmentBeanList.get(1).length;
+        pointBean.y = roomBean.height;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        // top left
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length;
+        pointBean.y = roomBean.height;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        planeModel.drawPlane(anchorNode);
+
+
+
+        planeModel = new PlaneModel();
+
+        // bottom left
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length;
+        pointBean.y = 0;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        // bottom right
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length + roomBean.floorPlaneBean.segmentBeanList.get(1).length;
+        pointBean.y = 0;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        // top right
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length + roomBean.floorPlaneBean.segmentBeanList.get(1).length;
+        pointBean.y = roomBean.height;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        // top left
+        pointBean = new PointBean();
+        pointBean.x = roomBean.floorPlaneBean.segmentBeanList.get(0).length;
+        pointBean.y = roomBean.height;
+        pointBean.z = 0;
+        pointModel = new PointModel(pointBean);
+        planeModel.pointModelList.add(pointModel);
+
+        planeModel.drawPlane(anchorNode);
     }
 
     public void createWallModelSizeSymbol() {

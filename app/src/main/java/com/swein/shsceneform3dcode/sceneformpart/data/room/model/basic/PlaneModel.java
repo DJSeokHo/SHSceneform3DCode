@@ -14,6 +14,10 @@ public class PlaneModel {
     public List<PointModel> pointModelList = new ArrayList<>();
     public List<SegmentModel> segmentModelList = new ArrayList<>();
 
+    public PlaneModel() {
+
+    }
+
     public PlaneModel(PlaneBean planeBean) {
 
         PointModel pointModel;

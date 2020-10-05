@@ -15,11 +15,13 @@ public class PlaneBean {
     public List<SegmentBean> segmentBeanList = new ArrayList<>();
 
     public String type;
+    public int objectOnIndex;
 
     public PlaneBean() {
         pointList.clear();
         segmentBeanList.clear();
         type = "";
+        objectOnIndex = -1;
     }
 
     public void clear() {
@@ -35,6 +37,7 @@ public class PlaneBean {
         segmentBeanList.clear();
 
         type = "";
+        objectOnIndex = -1;
     }
 
     public JSONObject toJSONObject() throws JSONException {
@@ -53,6 +56,7 @@ public class PlaneBean {
         jsonObject.put("segmentArray", segmentArray);
 
         jsonObject.put("type", type);
+        jsonObject.put("objectOnIndex", objectOnIndex);
         return jsonObject;
     }
 
@@ -76,6 +80,7 @@ public class PlaneBean {
         }
 
         type = jsonObject.getString("type");
+        objectOnIndex = jsonObject.getInt("objectOnIndex");
     }
 
     public void init(JSONObject jsonObject, float cx, float cy, float cz) throws JSONException {
@@ -98,5 +103,6 @@ public class PlaneBean {
         }
 
         type = jsonObject.getString("type");
+        objectOnIndex = jsonObject.getInt("objectOnIndex");
     }
 }

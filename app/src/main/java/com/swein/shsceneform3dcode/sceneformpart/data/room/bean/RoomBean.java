@@ -219,6 +219,15 @@ public class RoomBean {
         centerPoint.z = tz / floorPlaneBean.pointList.size();
     }
 
+    public RoomBean createWallModel() {
+        RoomBean roomBean = new RoomBean();
+
+        // TODO
+
+
+        return roomBean;
+    }
+
     public void calculateWallCenterPoint() {
 
         float length = 0;
