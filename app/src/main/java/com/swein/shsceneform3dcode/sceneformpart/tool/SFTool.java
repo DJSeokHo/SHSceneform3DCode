@@ -15,7 +15,7 @@ import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.swein.shsceneform3dcode.R;
-import com.swein.shsceneform3dcode.sceneformpart.FaceToCameraNode;
+import com.swein.shsceneform3dcode.sceneformpart.customnode.FaceToCameraNode;
 import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
 
 public class SFTool {

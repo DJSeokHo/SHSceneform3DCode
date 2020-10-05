@@ -6,9 +6,9 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.google.ar.sceneform.SceneView
+    <FrameLayout
         android:layout_gravity="center"
-        android:id="@+id/sceneView"
+        android:id="@+id/frameLayout"
         android:layout_width="300dp"
         android:layout_height="300dp"/>
 

@@ -1,4 +1,4 @@
-package com.swein.shsceneform3dcode.sceneformpart;
+package com.swein.shsceneform3dcode.sceneformpart.customnode;
 
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
