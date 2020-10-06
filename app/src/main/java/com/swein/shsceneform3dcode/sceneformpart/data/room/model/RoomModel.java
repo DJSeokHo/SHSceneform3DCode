@@ -87,14 +87,19 @@ public class RoomModel {
         PointBean offsetPointBean;
         PlaneBean wallObjectPlaneBean;
 
+        // for wall object list
         for(int k = 0; k < roomBean.wallObjectList.size(); k++) {
 
             planeModel = new PlaneModel();
 
             wallObjectPlaneBean = roomBean.wallObjectList.get(k);
+
+            // for floor point list
             for(int i = 0; i < roomBean.floorPlaneBean.pointList.size(); i++) {
 
                 if(i == wallObjectPlaneBean.objectOnIndex) {
+
+                    // for wall object point list
                     for(int j = 0; j < wallObjectPlaneBean.pointList.size(); j++) {
 
                         offsetPointBean = new PointBean();
@@ -111,6 +116,18 @@ public class RoomModel {
             planeModel.drawPlane(anchorNode);
             wallObjectPlaneModelList.add(planeModel);
 
+            // draw wall object size
+            for(int i = 0; i < planeModel.segmentModelList.size(); i++) {
+
+                if(i == 0 || i == 1) {
+                    SFTool.setSegmentSizeTextView(context,
+                            planeModel.segmentModelList.get(i).length, SFConstants.SFUnit.M,
+                            planeModel.segmentModelList.get(i).segmentNode, (viewRenderable, faceToCameraNode) -> {
+
+                            });
+                }
+
+            }
         }
 
     }
