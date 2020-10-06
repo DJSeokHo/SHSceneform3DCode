@@ -56,6 +56,27 @@ public class PlaneModel {
 
     }
 
+    public void drawPlaneWithoutClose(AnchorNode anchorNode) {
+
+        if(pointModelList.size() < 2) {
+            return;
+        }
+
+        for(int i = 0; i < pointModelList.size(); i++) {
+            pointModelList.get(i).pointNode.setParent(anchorNode);
+        }
+
+        SegmentModel segmentModel;
+        for(int i = 0; i < pointModelList.size() - 1; i++) {
+
+            segmentModel = new SegmentModel(
+                    SFTool.drawSegment(pointModelList.get(i).pointNode, pointModelList.get(i + 1).pointNode, SFMaterial.instance.segmentMaterial, false),
+                    MathTool.getLengthOfTwoNode(pointModelList.get(i).pointNode, pointModelList.get(i + 1).pointNode)
+            );
+            segmentModelList.add(segmentModel);
+        }
+    }
+
     public void clear() {
 
         for(int i = 0; i < pointModelList.size(); i++) {

@@ -84,8 +84,13 @@ public class SceneFormViewHolder {
 
     private AnchorNode anchorNode;
 
+    // prev rotation state
     private float prevXAngle = 0;
     private float prevYAngle = 0;
+
+    // prev movement state
+    private float prevXMove = 0;
+    private float prevYMove = 0;
 
     private void initSceneForm() {
 
@@ -104,6 +109,9 @@ public class SceneFormViewHolder {
             float xAngle = 0;
             float yAngle = 0;
 
+            float xMove = 0;
+            float yMove = 0;
+
             @Override
             public void onPeekTouch(HitTestResult hitTestResult, MotionEvent motionEvent) {
 
@@ -119,11 +127,35 @@ public class SceneFormViewHolder {
 
                         if (motionEvent.getPointerCount() == 1) {
 
-                            if(type != TYPE_3D) {
+                            if (isScale) {
                                 return;
                             }
 
-                            if (isScale) {
+                            if(type != TYPE_3D) {
+
+                                if (Math.abs(motionEvent.getX() - downX) > 40 || Math.abs(motionEvent.getY() - downY) > 40) {
+
+                                    // re-center point
+                                    // let view center as touch center point
+//                                float x = motionEvent.getX() - sceneView.getWidth() * 0.5f;
+//                                float y = motionEvent.getY() - sceneView.getHeight() * 0.5f;
+
+                                    // let touched point as touch center point
+                                    float x = motionEvent.getX() - downX;
+                                    float y = motionEvent.getY() - downY;
+                                    // re-center point
+
+                                    float percentX = x / (sceneView.getWidth() * 0.5f);
+                                    float percentY = y / (sceneView.getHeight() * 0.5f);
+
+                                    xMove = percentX + prevXMove;
+                                    yMove = percentY + prevYMove;
+//                                    anchorNode.setWorldPosition(new Vector3(percentX, -percentY, 0));
+
+                                    Camera camera = sceneView.getScene().getCamera();
+                                    camera.setWorldPosition(new Vector3(-xMove, yMove, camera.getWorldPosition().z));
+                                }
+
                                 return;
                             }
 
@@ -142,7 +174,7 @@ public class SceneFormViewHolder {
                                 float percentX = x / (sceneView.getWidth() * 0.5f);
                                 float percentY = y / (sceneView.getHeight() * 0.5f);
 
-                                anchorNode.getWorldRotation();
+//                                anchorNode.getWorldRotation();
 
                                 xAngle = percentX * 360 * 0.25f + prevXAngle;
                                 yAngle = percentY * 360 * 0.25f + prevYAngle;
@@ -196,6 +228,11 @@ public class SceneFormViewHolder {
                         break;
 
                     case MotionEvent.ACTION_UP:
+
+                        if(type != TYPE_3D) {
+                            prevXMove = xMove;
+                            prevYMove = yMove;
+                        }
 
                         if(isScale) {
                             // scale
@@ -283,7 +320,9 @@ public class SceneFormViewHolder {
             create2DModel(tempRoomBean);
         }
         else if(type == TYPE_WALL) {
-            createWallModel(tempRoomBean);
+
+            RoomBean wallRoomBean = tempRoomBean.createWallModel();
+            createWallModel(wallRoomBean);
         }
 
     }
@@ -336,14 +375,12 @@ public class SceneFormViewHolder {
     private void createWallModel(RoomBean tempRoomBean) {
 
         // re set camera
-        float z = roomBean.height;
-        for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
-            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
-                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
-            }
+        float z = 0;
+        for(int i = 0; i < roomBean.floorPlaneBean.pointList.size(); i++) {
+            z += roomBean.floorPlaneBean.pointList.get(i).x;
         }
 
-        setCameraPosition(0f, 0f, z * 1.5f);
+        setCameraPosition(0f, 0f, z * 4f);
         setCameraRange(0.0001f, z * 10f);
         // re set camera
 
@@ -351,8 +388,6 @@ public class SceneFormViewHolder {
         roomModel = new RoomModel(tempRoomBean);
         roomModel.context = view.getContext();
         roomModel.createWallModel(anchorNode);
-        roomModel.createWallModelSizeSymbol();
-
     }
 
     public void pause() {

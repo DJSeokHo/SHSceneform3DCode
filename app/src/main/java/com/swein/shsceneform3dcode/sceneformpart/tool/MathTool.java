@@ -38,6 +38,17 @@ public class MathTool {
         return difference.length();
     }
 
+    public static float getLengthOfTwoNode(Vector3 startVector3, Vector3 endVector3) {
+
+        Vector3 difference = Vector3.subtract(startVector3, endVector3);
+        return difference.length();
+    }
+
+    public static float getLengthOfTwoNode2D(float startX, float startY, float endX, float endY) {
+
+        return (float) Math.sqrt(Math.pow((startX - endX), 2) + Math.pow((startY - endY), 2));
+    }
+
     public static double getNodesDistanceMetersWithoutHeight(Node startNode, Node endNode) {
         float dx = startNode.getWorldPosition().x - endNode.getWorldPosition().x;
         float dz = startNode.getWorldPosition().z - endNode.getWorldPosition().z;

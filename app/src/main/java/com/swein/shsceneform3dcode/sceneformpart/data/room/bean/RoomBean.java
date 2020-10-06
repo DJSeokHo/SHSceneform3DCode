@@ -4,6 +4,8 @@ import com.google.ar.sceneform.math.Vector3;
 import com.swein.shsceneform3dcode.framework.parsing.ParsingUtil;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PlaneBean;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PointBean;
+import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.SegmentBean;
+import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,6 +18,8 @@ import java.util.List;
  * 모든 치수 다 m(미터) 단위로 저장합니다.
  */
 public class RoomBean {
+
+    private final static String TAG = "RoomBean";
 
     // normal vector of floor
     public Vector3 normalVectorOfPlane;
@@ -219,13 +223,130 @@ public class RoomBean {
         centerPoint.z = tz / floorPlaneBean.pointList.size();
     }
 
+    /**
+     * 입면도
+     *
+     * this part need re-calculate all point
+     * because all plane are in same surface
+     */
     public RoomBean createWallModel() {
-        RoomBean roomBean = new RoomBean();
 
-        // TODO
+        RoomBean wallRoomBean = new RoomBean();
+
+        wallRoomBean.height = height;
+
+        // calculate floor
+        List<PointBean> floorPointList = new ArrayList<>();
+
+        PointBean pointBean = new PointBean();
+        pointBean.x = floorPlaneBean.pointList.get(0).x;
+        pointBean.y = floorPlaneBean.pointList.get(0).y;
+        pointBean.z = 0;
+        floorPointList.add(pointBean);
+
+        float floorSegmentLength = pointBean.x;
+        for(int i = 0; i < floorPlaneBean.segmentBeanList.size(); i++) {
+
+            floorSegmentLength += floorPlaneBean.segmentBeanList.get(i).length;
+
+            pointBean = new PointBean();
+            pointBean.x = floorSegmentLength;
+            pointBean.y = floorPlaneBean.pointList.get(i).y;
+            pointBean.z = 0;
+            floorPointList.add(pointBean);
+        }
+
+        wallRoomBean.floorPlaneBean.pointList.addAll(floorPointList);
 
 
-        return roomBean;
+        // calculate ceiling
+        List<PointBean> ceilingPointList = new ArrayList<>();
+
+        pointBean = new PointBean();
+        pointBean.x = ceilingPlaneBean.pointList.get(0).x;
+        pointBean.y = ceilingPlaneBean.pointList.get(0).y;
+        pointBean.z = 0;
+        ceilingPointList.add(pointBean);
+
+        float ceilingSegmentLength = pointBean.x;
+        for(int i = 0; i < ceilingPlaneBean.segmentBeanList.size(); i++) {
+
+            ceilingSegmentLength += ceilingPlaneBean.segmentBeanList.get(i).length;
+
+            pointBean = new PointBean();
+            pointBean.x = ceilingSegmentLength;
+            pointBean.y = ceilingPlaneBean.pointList.get(i).y;
+            pointBean.z = 0;
+            ceilingPointList.add(pointBean);
+        }
+
+        wallRoomBean.ceilingPlaneBean.pointList.addAll(ceilingPointList);
+
+
+        // calculate segment length
+        SegmentBean segmentBean;
+        for(int i = 0; i < wallRoomBean.floorPlaneBean.pointList.size() - 1; i++) {
+            segmentBean = new SegmentBean();
+            segmentBean.startPointBean = wallRoomBean.floorPlaneBean.pointList.get(i);
+            segmentBean.endPointBean = wallRoomBean.floorPlaneBean.pointList.get(i + 1);
+            segmentBean.length = floorPlaneBean.segmentBeanList.get(i).length;
+            wallRoomBean.floorPlaneBean.segmentBeanList.add(segmentBean);
+        }
+
+        for(int i = 0; i < wallRoomBean.ceilingPlaneBean.pointList.size() - 1; i++) {
+            segmentBean = new SegmentBean();
+            segmentBean.startPointBean = wallRoomBean.ceilingPlaneBean.pointList.get(i);
+            segmentBean.endPointBean = wallRoomBean.ceilingPlaneBean.pointList.get(i + 1);
+            segmentBean.length = ceilingPlaneBean.segmentBeanList.get(i).length;
+            wallRoomBean.ceilingPlaneBean.segmentBeanList.add(segmentBean);
+        }
+
+        // calculate wall object
+
+        List<PlaneBean> wallObjectPlaneBeanList = new ArrayList<>();
+
+        PlaneBean wallObjectPlaneBean;
+        for(int i = 0; i < wallObjectList.size(); i++) {
+
+            PlaneBean wallObject = wallObjectList.get(i);
+            PlaneBean wall = wallList.get(wallObject.objectOnIndex);
+
+            wallObjectPlaneBean = new PlaneBean();
+            wallObjectPlaneBean.objectOnIndex = wallObject.objectOnIndex;
+
+            List<PointBean> wallObjectPointList = new ArrayList<>();
+            PointBean objectPointBean;
+            for(int j = 0; j < wallObject.pointList.size(); j++) {
+
+                // get the index of wall object's object of reference point
+                // we need get index that left bottom point of plane
+                // because this part is draw start from left bottom point
+//                int leftBottomPointIndex = getIndexOfLeftBottomPointOnThePlane(wall.pointList);
+                int leftBottomPointIndex = 0;
+
+                float distanceOfTwoPointByXZ = MathTool.getLengthOfTwoNode2D(
+                        wallObject.pointList.get(j).x, wallObject.pointList.get(j).z,
+                        wall.pointList.get(leftBottomPointIndex).x, wall.pointList.get(leftBottomPointIndex).z
+                );
+
+//                ILog.iLogDebug(TAG, distanceOfTwoPointByXZ);
+
+                float distanceOfTwoPointByY = wallObject.pointList.get(j).y - wall.pointList.get(leftBottomPointIndex).y;
+
+                objectPointBean = new PointBean();
+                objectPointBean.x = distanceOfTwoPointByXZ;
+                objectPointBean.y = distanceOfTwoPointByY;
+                objectPointBean.z = 0;
+                wallObjectPointList.add(objectPointBean);
+            }
+
+            wallObjectPlaneBean.pointList.addAll(wallObjectPointList);
+            wallObjectPlaneBeanList.add(wallObjectPlaneBean);
+        }
+
+        wallRoomBean.wallObjectList.addAll(wallObjectPlaneBeanList);
+
+        return wallRoomBean;
     }
 
     public void calculateWallCenterPoint() {
@@ -239,6 +360,40 @@ public class RoomBean {
         centerPoint.x = length * 0.5f;
         centerPoint.y = height * 0.5f;
         centerPoint.z = 0;
+    }
+
+    private int getIndexOfLeftBottomPointOnThePlane(List<PointBean> list) {
+        PointBean tempPointBean = new PointBean();
+
+        float x = 0;
+        float y = 0;
+        float z = 0;
+        for(int i = 0; i < list.size(); i++) {
+            if(x >= list.get(i).x) {
+                x = list.get(i).x;
+            }
+            if(y >= list.get(i).y) {
+                y = list.get(i).y;
+            }
+            if(z >= list.get(i).z) {
+                z = list.get(i).z;
+            }
+        }
+
+        tempPointBean.x = x;
+        tempPointBean.y = y;
+        tempPointBean.z = z;
+
+
+        int index = 0;
+        for(int i = 0; i < list.size(); i++) {
+            if(tempPointBean.x == list.get(i).x && tempPointBean.y == list.get(i).y && tempPointBean.z == list.get(i).z) {
+                index = i;
+                break;
+            }
+        }
+
+        return index;
     }
 
     public void clear() {
