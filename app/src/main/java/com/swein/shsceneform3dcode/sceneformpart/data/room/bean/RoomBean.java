@@ -1,7 +1,7 @@
 package com.swein.shsceneform3dcode.sceneformpart.data.room.bean;
 
 import com.google.ar.sceneform.math.Vector3;
-import com.swein.shsceneform3dcode.framework.parsing.ParsingUtil;
+import com.swein.shsceneform3dcode.framework.util.parsing.ParsingUtil;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PlaneBean;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.PointBean;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic.SegmentBean;
@@ -52,6 +52,8 @@ public class RoomBean {
 
     public PointBean centerPoint;
 
+    public String thumbnailImage;
+
     public RoomBean() {
 
         normalVectorOfPlane = new Vector3();
@@ -71,6 +73,7 @@ public class RoomBean {
 
         name = "";
         unit = "";
+        thumbnailImage = "";
     }
 
     public JSONObject toJSONObject() throws JSONException {
@@ -104,6 +107,7 @@ public class RoomBean {
 
         jsonObject.put("name", name);
         jsonObject.put("unit", unit);
+        jsonObject.put("thumbnailImage", thumbnailImage);
 
         return jsonObject;
     }
@@ -148,6 +152,7 @@ public class RoomBean {
 
         name = ParsingUtil.parsingString(jsonObject, "name");
         unit = ParsingUtil.parsingString(jsonObject, "unit");
+        thumbnailImage = ParsingUtil.parsingString(jsonObject, "thumbnailImage");
     }
 
     public void init(JSONObject jsonObject, float cx, float cy, float cz) throws JSONException {
@@ -190,6 +195,7 @@ public class RoomBean {
 
         name = ParsingUtil.parsingString(jsonObject, "name");
         unit = ParsingUtil.parsingString(jsonObject, "unit");
+        thumbnailImage = ParsingUtil.parsingString(jsonObject, "thumbnailImage");
 
     }
 
@@ -432,5 +438,6 @@ public class RoomBean {
 
         name = null;
         unit = null;
+        thumbnailImage = null;
     }
 }

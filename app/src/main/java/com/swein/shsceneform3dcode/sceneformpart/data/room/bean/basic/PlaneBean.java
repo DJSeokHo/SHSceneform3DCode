@@ -1,6 +1,6 @@
 package com.swein.shsceneform3dcode.sceneformpart.data.room.bean.basic;
 
-import com.swein.shsceneform3dcode.framework.parsing.ParsingUtil;
+import com.swein.shsceneform3dcode.framework.util.parsing.ParsingUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;

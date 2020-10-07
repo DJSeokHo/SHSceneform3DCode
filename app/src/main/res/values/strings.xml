@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SHSceneform3DCode</string>
+
+    <string name="scene_form_model_list_title">즉정 기록</string>
 </resources>

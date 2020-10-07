@@ -1,9 +1,16 @@
 package com.swein.shsceneform3dcode.sceneformpart;
 
-import android.content.Context;
+import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.view.MotionEvent;
+import android.view.PixelCopy;
 import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.sceneform.AnchorNode;
@@ -14,17 +21,30 @@ import com.google.ar.sceneform.SceneView;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.swein.shsceneform3dcode.R;
-import com.swein.shsceneform3dcode.framework.debug.ILog;
+import com.swein.shsceneform3dcode.framework.util.debug.ILog;
+import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.EventCenter;
+import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
 import com.swein.shsceneform3dcode.framework.util.view.ViewUtil;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
-import com.swein.shsceneform3dcode.sceneformpart.material.SFMaterial;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.model.RoomModel;
+import com.swein.shsceneform3dcode.sceneformpart.material.SFMaterial;
 import com.swein.shsceneform3dcode.sceneformpart.renderable.SFRenderable;
 
 import org.json.JSONException;
-import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 
 public class SceneFormViewHolder {
+
+    public interface SceneFormViewHolderDelegate {
+        void onLoadModelFinish();
+    }
 
     public final static int TYPE_3D = 0;
     public final static int TYPE_2D = 1;
@@ -39,14 +59,16 @@ public class SceneFormViewHolder {
     private RoomBean roomBean;
     private RoomModel roomModel;
 
-    private String jsonObjectString;
-
     private int type;
+    private float maxFar = 0;
 
-    public SceneFormViewHolder(Context context, String jsonObjectString, int type) {
-        view = ViewUtil.inflateView(context, R.layout.view_holder_scene_form, null);
+    private SceneFormViewHolderDelegate sceneFormViewHolderDelegate;
+
+    public SceneFormViewHolder(Activity activity, RoomBean roomBean, int type, @Nullable SceneFormViewHolderDelegate sceneFormViewHolderDelegate) {
+        view = ViewUtil.inflateView(activity, R.layout.view_holder_scene_form, null);
+        this.sceneFormViewHolderDelegate = sceneFormViewHolderDelegate;
         this.type = type;
-        this.jsonObjectString = jsonObjectString;
+        this.roomBean = roomBean;
 
         findView();
         initSceneForm();
@@ -57,7 +79,16 @@ public class SceneFormViewHolder {
         SFMaterial.instance.init(view.getContext(), () -> {
             SFRenderable.instance.init(view.getContext(), () -> {
 
-                createRoomBean();
+                if(type == TYPE_3D) {
+                    roomBean.calculate3DModelCenterPoint();
+                }
+                else if(type == TYPE_2D) {
+                    roomBean.calculate2DModelCenterPoint();
+                }
+                else if(type == TYPE_WALL) {
+                    roomBean.calculateWallCenterPoint();
+                }
+
                 createAnchorNode();
 
                 RoomBean tempRoomBean = createTempRoomBean(roomBean.centerPoint.x, roomBean.centerPoint.y, roomBean.centerPoint.z);
@@ -179,9 +210,10 @@ public class SceneFormViewHolder {
                                 xAngle = percentX * 360 * 0.25f + prevXAngle;
                                 yAngle = percentY * 360 * 0.25f + prevYAngle;
 
+                                ILog.iLogDebug(TAG, roomBean.centerPoint.x + " " + roomBean.centerPoint.y + " " + roomBean.centerPoint.z);
+
                                 Quaternion xQuaternion = Quaternion.axisAngle(new Vector3(0.0f, 1.0f, 0.0f), xAngle);
                                 Quaternion yQuaternion = Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), yAngle);
-
                                 anchorNode.setWorldRotation(Quaternion.multiply(xQuaternion, yQuaternion));
                             }
 
@@ -198,31 +230,35 @@ public class SceneFormViewHolder {
                             }
 
                             if (0 == scale) {
-                                scale = anchorNode.getWorldScale().x;
+//                                scale = anchorNode.getWorldScale().x;
+                                scale = sceneView.getScene().getCamera().getWorldPosition().z;
                             }
 
                             float screenViewPercent = motionEventDistance(motionEvent) / sceneView.getWidth();
 
                             if (distance > tempDistance) {
                                 // plus(zoom in)
-                                scale += screenViewPercent * 0.05f;
+                                scale -= screenViewPercent * 0.05f;
                             }
                             else if (distance < tempDistance) {
                                 // minus(zoom out)
-                                scale -= screenViewPercent * 0.05f;
+                                scale += screenViewPercent * 0.05f;
                             }
                             // =================== check is plus(zoom in) or minus(zoom out) =====================
 
                             // =================== set scale limit ===================
-                            if (scale <= 0.5) {
-                                scale = 0.5f;
+                            if (scale <= 0.01) {
+                                scale = 0.01f;
                             }
-                            else if (scale > 4) {
-                                scale = 4;
+                            else if (scale > maxFar * 10) {
+                                scale = maxFar;
                             }
                             // =================== set scale limit ===================
 
-                            anchorNode.setWorldScale(new Vector3(scale, scale, scale));
+                            sceneView.getScene().getCamera().setWorldPosition(
+                                    new Vector3(sceneView.getScene().getCamera().getWorldPosition().x,
+                                            sceneView.getScene().getCamera().getWorldPosition().y, scale));
+//                            anchorNode.setWorldScale(new Vector3(scale, scale, scale));
                         }
 
                         break;
@@ -264,31 +300,6 @@ public class SceneFormViewHolder {
         return (float)Math.sqrt(x * x + y * y);
     }
 
-    private void createRoomBean() {
-        try {
-            JSONObject jsonObject = new JSONObject(jsonObjectString);
-
-            roomBean = new RoomBean();
-            roomBean.init(jsonObject);
-
-            if(type == TYPE_3D) {
-                roomBean.calculate3DModelCenterPoint();
-            }
-            else if(type == TYPE_2D) {
-                roomBean.calculate2DModelCenterPoint();
-            }
-            else if(type == TYPE_WALL) {
-                roomBean.calculateWallCenterPoint();
-            }
-
-            ILog.iLogDebug(TAG, roomBean.toString());
-
-        }
-        catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void createAnchorNode() {
 
         if(anchorNode == null) {
@@ -318,27 +329,29 @@ public class SceneFormViewHolder {
         }
         else if(type == TYPE_2D) {
             create2DModel(tempRoomBean);
+            if(sceneFormViewHolderDelegate != null) {
+                sceneFormViewHolderDelegate.onLoadModelFinish();
+            }
         }
         else if(type == TYPE_WALL) {
 
             RoomBean wallRoomBean = tempRoomBean.createWallModel();
             createWallModel(wallRoomBean);
         }
-
     }
 
     private void create3DModel(RoomBean tempRoomBean) {
 
         // re set camera
-        float z = roomBean.height;
+        maxFar = roomBean.height;
         for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
-            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
-                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
+            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > maxFar) {
+                maxFar = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
             }
         }
 
-        setCameraPosition(0f, 0f, z * 1.5f);
-        setCameraRange(0.0001f, z * 10f);
+        setCameraPosition(0f, 0f, maxFar * 1.5f);
+        setCameraRange(0.0001f, maxFar * 10f);
         // re set camera
 
 
@@ -351,15 +364,15 @@ public class SceneFormViewHolder {
     private void create2DModel(RoomBean tempRoomBean) {
 
         // re set camera
-        float z = roomBean.height;
+        maxFar = roomBean.height;
         for(int i = 0; i < roomBean.floorPlaneBean.segmentBeanList.size(); i++) {
-            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > z) {
-                z = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
+            if(roomBean.floorPlaneBean.segmentBeanList.get(i).length > maxFar) {
+                maxFar = roomBean.floorPlaneBean.segmentBeanList.get(i).length;
             }
         }
 
-        setCameraPosition(0f, 0f, z * 0.8f);
-        setCameraRange(0.0001f, z * 10f);
+        setCameraPosition(0f, 0f, maxFar * 0.8f);
+        setCameraRange(0.0001f, maxFar * 10f);
         // re set camera
 
         roomModel = new RoomModel(tempRoomBean);
@@ -375,19 +388,76 @@ public class SceneFormViewHolder {
     private void createWallModel(RoomBean tempRoomBean) {
 
         // re set camera
-        float z = 0;
+        maxFar = 0;
         for(int i = 0; i < roomBean.floorPlaneBean.pointList.size(); i++) {
-            z += roomBean.floorPlaneBean.pointList.get(i).x;
+            maxFar += roomBean.floorPlaneBean.pointList.get(i).x;
         }
 
-        setCameraPosition(0f, 0f, z * 4f);
-        setCameraRange(0.0001f, z * 10f);
+        setCameraPosition(0f, 0f, maxFar * 4f);
+        setCameraRange(0.0001f, maxFar * 10f);
         // re set camera
-
 
         roomModel = new RoomModel(tempRoomBean);
         roomModel.context = view.getContext();
         roomModel.createWallModel(anchorNode);
+    }
+
+    public void captureThumbnailImage(Runnable empty) {
+
+        final HandlerThread handlerThread = new HandlerThread("PixelCopier");
+        handlerThread.start();
+
+        sceneView.post(() -> {
+            final Bitmap bitmap = Bitmap.createBitmap(sceneView.getWidth(), sceneView.getHeight(), Bitmap.Config.ARGB_8888);
+
+            PixelCopy.request(sceneView, bitmap, new PixelCopy.OnPixelCopyFinishedListener() {
+                @Override
+                public void onPixelCopyFinished(int i) {
+                    if (i == PixelCopy.SUCCESS) {
+
+                        try {
+                            String filePath = generateFilePath();
+                            saveBitmapToDisk(bitmap, filePath);
+                            ILog.iLogDebug(TAG, filePath);
+
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put("filePath", filePath);
+                            EventCenter.instance.sendEvent(ESSArrows.UPDATE_2D_IMAGE, this, hashMap);
+                        }
+                        catch (IOException e) {
+                            empty.run();
+                        }
+                    }
+                    else {
+                        empty.run();
+                    }
+                }
+            }, new Handler(handlerThread.getLooper()));
+        });
+
+    }
+
+    private String generateFilePath() {
+        String date =
+                new SimpleDateFormat("yyyyMMddHHmmss", java.util.Locale.getDefault()).format(new Date());
+        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + "Sceneform/" + date + "_screenshot.jpg";
+    }
+
+    private void saveBitmapToDisk(Bitmap bitmap, String filename) throws IOException {
+
+        File out = new File(filename);
+        if (!out.getParentFile().exists()) {
+            out.getParentFile().mkdirs();
+        }
+        try (FileOutputStream outputStream = new FileOutputStream(filename);
+             ByteArrayOutputStream outputData = new ByteArrayOutputStream()) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputData);
+            outputData.writeTo(outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException ex) {
+            throw new IOException("Failed to save bitmap to disk", ex);
+        }
     }
 
     public void pause() {

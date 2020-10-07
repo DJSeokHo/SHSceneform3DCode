@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="bottom_tab_bar_height">50dp</dimen>
+    <dimen name="bottom_tab_bar_total_height">75dp</dimen>
+    <dimen name="navigation_bar_height">50dp</dimen>
+    <dimen name="top_status_bar_height">24dp</dimen>
+    <dimen name="top_sliding_tab_layout_height">50dp</dimen>
+    <dimen name="banner_height">120dp</dimen>
+    <dimen name="hot_story_height">220dp</dimen>
+    <dimen name="hot_story_item_width">120dp</dimen>
+    <dimen name="hot_story_item_height">180dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+</resources>
