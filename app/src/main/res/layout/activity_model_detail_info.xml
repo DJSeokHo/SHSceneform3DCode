@@ -1,30 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".modeldetailinfo.ModelDetailInfoActivity"
-    android:orientation="vertical">
+    android:background="@color/white">
 
     <FrameLayout
-        android:layout_gravity="center"
-        android:id="@+id/frameLayout1"
-        android:layout_width="200dp"
-        android:layout_height="200dp"/>
+        android:id="@+id/frameLayoutNavigationBar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/navigation_bar_height"/>
 
-    <FrameLayout
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center"
-        android:id="@+id/frameLayout2"
-        android:layout_width="200dp"
-        android:layout_height="200dp"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none">
 
-    <FrameLayout
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center"
-        android:id="@+id/frameLayout3"
-        android:layout_width="200dp"
-        android:layout_height="200dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-</LinearLayout>
+            <com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch
+                android:id="@+id/horizontalScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:id="@+id/viewStartSpace"
+                        android:layout_width="5dp"
+                        android:layout_height="400dp"/>
+
+                    <FrameLayout
+                        android:layout_gravity="center"
+                        android:id="@+id/frameLayout3D"
+                        android:layout_width="400dp"
+                        android:layout_height="400dp"/>
+
+                    <FrameLayout
+                        android:layout_marginStart="10dp"
+                        android:layout_gravity="center"
+                        android:id="@+id/frameLayout2D"
+                        android:layout_width="400dp"
+                        android:layout_height="400dp"/>
+
+                    <FrameLayout
+                        android:layout_marginStart="10dp"
+                        android:layout_gravity="center"
+                        android:id="@+id/frameLayoutWall"
+                        android:layout_width="400dp"
+                        android:layout_height="400dp"/>
+
+                    <View
+                        android:id="@+id/viewEndSpace"
+                        android:layout_width="5dp"
+                        android:layout_height="400dp"/>
+
+                </LinearLayout>
+
+            </com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch>
+
+
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</FrameLayout>

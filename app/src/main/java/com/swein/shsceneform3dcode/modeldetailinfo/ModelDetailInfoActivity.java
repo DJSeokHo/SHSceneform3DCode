@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 import androidx.fragment.app.FragmentActivity;
 
 import com.swein.shsceneform3dcode.R;
+import com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
 import com.swein.shsceneform3dcode.framework.util.theme.ThemeUtil;
 import com.swein.shsceneform3dcode.framework.util.thread.ThreadUtil;
@@ -20,14 +21,19 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
     private final static String TAG = "ModelDetailInfoActivity";
 
-    private FrameLayout frameLayout1;
-    private FrameLayout frameLayout2;
-    private FrameLayout frameLayout3;
+    private FrameLayout frameLayout3D;
+    private FrameLayout frameLayout2D;
+    private FrameLayout frameLayoutWall;
+
+    private FrameLayout frameLayoutNavigationBar;
+
     private SceneFormViewHolder sceneFormViewHolder3D;
     private SceneFormViewHolder sceneFormViewHolder2D;
     private SceneFormViewHolder sceneFormViewHolderWall;
 
     private RoomBean roomBean;
+
+    private CustomHorizontalScrollViewDisableTouch horizontalScrollView;
 
     private boolean canExit = false;
 
@@ -42,8 +48,14 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
         checkBundle();
         findView();
+        initNavigationBar();
         initSceneForm();
         updateState();
+
+
+        ThreadUtil.startUIThread(1000, () -> {
+            horizontalScrollView.smoothScrollTo(500, 0);
+        });
     }
 
     @Override
@@ -75,6 +87,72 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         else {
             finish();
         }
+    }
+
+    private void findView() {
+
+        frameLayoutNavigationBar = findViewById(R.id.frameLayoutNavigationBar);
+        horizontalScrollView = findViewById(R.id.horizontalScrollView);
+
+        frameLayout3D = findViewById(R.id.frameLayout3D);
+        frameLayout2D = findViewById(R.id.frameLayout2D);
+        frameLayoutWall = findViewById(R.id.frameLayoutWall);
+    }
+
+    private void initNavigationBar() {
+
+    }
+
+    private void initSceneForm() {
+
+        sceneFormViewHolder3D = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_3D, null);
+        frameLayout3D.addView(sceneFormViewHolder3D.view);
+
+        sceneFormViewHolder2D = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_2D, () -> {
+            if(roomBean.thumbnailImage.equals("")) {
+
+                ThreadUtil.startThread(() -> {
+                    try {
+                        Thread.sleep(1000);
+
+                        ThreadUtil.startUIThread(0, this::captureThumbnailImage);
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        });
+        frameLayout2D.addView(sceneFormViewHolder2D.view);
+
+        sceneFormViewHolderWall = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_WALL, null);
+        frameLayoutWall.addView(sceneFormViewHolderWall.view);
+    }
+
+    private void captureThumbnailImage() {
+        if(sceneFormViewHolder2D != null) {
+            sceneFormViewHolder2D.captureThumbnailImage(this::finish);
+
+            canExit = true;
+        }
+    }
+
+    private void updateState() {
+        if(!roomBean.thumbnailImage.equals("")) {
+            canExit = true;
+        }
+        else {
+            canExit = false;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(canExit) {
+            finish();
+        }
+
     }
 
     @Override
@@ -109,64 +187,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         if(sceneFormViewHolderWall != null) {
             sceneFormViewHolderWall.resume();
         }
-    }
-
-    private void findView() {
-        frameLayout1 = findViewById(R.id.frameLayout1);
-        frameLayout2 = findViewById(R.id.frameLayout2);
-        frameLayout3 = findViewById(R.id.frameLayout3);
-    }
-
-    private void initSceneForm() {
-
-        sceneFormViewHolder3D = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_3D, null);
-        frameLayout1.addView(sceneFormViewHolder3D.view);
-
-        sceneFormViewHolder2D = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_2D, () -> {
-            if(roomBean.thumbnailImage.equals("")) {
-
-                ThreadUtil.startThread(() -> {
-                    try {
-                        Thread.sleep(1000);
-
-                        ThreadUtil.startUIThread(0, this::captureThumbnailImage);
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-        });
-        frameLayout2.addView(sceneFormViewHolder2D.view);
-
-        sceneFormViewHolderWall = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_WALL, null);
-        frameLayout3.addView(sceneFormViewHolderWall.view);
-    }
-
-    private void captureThumbnailImage() {
-        if(sceneFormViewHolder2D != null) {
-            sceneFormViewHolder2D.captureThumbnailImage(this::finish);
-
-            canExit = true;
-        }
-    }
-
-    private void updateState() {
-        if(!roomBean.thumbnailImage.equals("")) {
-            canExit = true;
-        }
-        else {
-            canExit = false;
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-
-        if(canExit) {
-            finish();
-        }
-
     }
 
     @Override
