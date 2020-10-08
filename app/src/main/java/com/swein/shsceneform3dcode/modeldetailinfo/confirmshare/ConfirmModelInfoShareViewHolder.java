@@ -1,8 +1,6 @@
 package com.swein.shsceneform3dcode.modeldetailinfo.confirmshare;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,7 +16,6 @@ import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 

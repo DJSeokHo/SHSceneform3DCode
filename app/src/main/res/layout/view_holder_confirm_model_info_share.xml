@@ -83,7 +83,6 @@
             android:layout_height="match_parent"/>
 
         <ImageView
-            android:visibility="gone"
             android:id="@+id/imageViewPDF"
             android:padding="20dp"
             android:src="@drawable/i_pdf"
