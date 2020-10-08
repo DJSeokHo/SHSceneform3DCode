@@ -6,12 +6,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.swein.shsceneform3dcode.R;
+import com.swein.shsceneform3dcode.framework.util.animation.AnimationUtil;
 import com.swein.shsceneform3dcode.framework.util.view.ViewUtil;
 
 public class SimpleOneInputTwoBottomPopupViewHolder {
 
     public interface SimpleOneInputTwoBottomPopupViewHolderDelegate {
-        void onConfirm();
+        void onConfirm(String name);
         void onClose();
     }
 
@@ -37,7 +38,14 @@ public class SimpleOneInputTwoBottomPopupViewHolder {
 
     private void setListener() {
         textViewCancel.setOnClickListener(view -> simpleOneInputTwoBottomPopupViewHolderDelegate.onClose());
-        textViewConfirm.setOnClickListener(view -> simpleOneInputTwoBottomPopupViewHolderDelegate.onConfirm());
+        textViewConfirm.setOnClickListener(view -> {
+            String name = editTextName.getText().toString().trim();
+            if(name.equals("")) {
+                AnimationUtil.shakeView(view.getContext(), editTextName);
+                return;
+            }
+            simpleOneInputTwoBottomPopupViewHolderDelegate.onConfirm(name);
+        });
     }
 
 

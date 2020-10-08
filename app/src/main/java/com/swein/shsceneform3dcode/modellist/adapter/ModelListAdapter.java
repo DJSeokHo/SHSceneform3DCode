@@ -44,6 +44,10 @@ public class ModelListAdapter extends RecyclerView.Adapter {
         notifyItemInserted(0);
     }
 
+    public void update(RoomBean roomBean) {
+
+    }
+
     public void reloadList(List<RoomBean> roomBeanList) {
 
         this.roomBeanList.clear();

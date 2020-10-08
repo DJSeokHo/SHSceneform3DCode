@@ -217,7 +217,7 @@ public class ModelListActivity extends BasicPermissionActivity {
         simpleOneInputTwoBottomPopupViewHolder.setString(roomBean.name);
         simpleOneInputTwoBottomPopupViewHolder.simpleOneInputTwoBottomPopupViewHolderDelegate = new SimpleOneInputTwoBottomPopupViewHolder.SimpleOneInputTwoBottomPopupViewHolderDelegate() {
             @Override
-            public void onConfirm() {
+            public void onConfirm(String name) {
 
                 // TODO edit name
 
