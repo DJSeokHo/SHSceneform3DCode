@@ -2,20 +2,35 @@ package com.swein.shsceneform3dcode.modeldetailinfo;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import androidx.fragment.app.FragmentActivity;
 
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch;
+import com.swein.shsceneform3dcode.commonui.navigation.SimpleNavigationBarViewHolder;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
+import com.swein.shsceneform3dcode.framework.util.debug.ILog;
+import com.swein.shsceneform3dcode.framework.util.display.DisplayUtil;
 import com.swein.shsceneform3dcode.framework.util.theme.ThemeUtil;
 import com.swein.shsceneform3dcode.framework.util.thread.ThreadUtil;
+import com.swein.shsceneform3dcode.modeldetailinfo.item.ModelDetailInfoItemViewHolder;
 import com.swein.shsceneform3dcode.sceneformpart.SceneFormViewHolder;
+import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
+import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ModelDetailInfoActivity extends FragmentActivity {
 
@@ -25,6 +40,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
     private FrameLayout frameLayout2D;
     private FrameLayout frameLayoutWall;
 
+    private SimpleNavigationBarViewHolder simpleNavigationBarViewHolder;
     private FrameLayout frameLayoutNavigationBar;
 
     private SceneFormViewHolder sceneFormViewHolder3D;
@@ -35,7 +51,20 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
     private CustomHorizontalScrollViewDisableTouch horizontalScrollView;
 
+    private LinearLayout linearLayoutThreeD;
+    private LinearLayout linearLayoutTwoD;
+    private LinearLayout linearLayoutWall;
+
     private boolean canExit = false;
+
+    private Spinner spinner;
+
+    private LinearLayout linearLayoutInfo;
+
+    private List<ModelDetailInfoItemViewHolder> modelDetailInfoItemViewHolderList = new ArrayList<>();
+
+    private String unit;
+    private List<String> unitList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +77,15 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
         checkBundle();
         findView();
+        setListener();
         initNavigationBar();
-        initSceneForm();
         updateState();
+        initView();
 
+        initSceneForm();
+        initSpinner();
 
-        ThreadUtil.startUIThread(1000, () -> {
-            horizontalScrollView.smoothScrollTo(500, 0);
-        });
+        linearLayoutThreeD.performClick();
     }
 
     @Override
@@ -97,9 +127,99 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         frameLayout3D = findViewById(R.id.frameLayout3D);
         frameLayout2D = findViewById(R.id.frameLayout2D);
         frameLayoutWall = findViewById(R.id.frameLayoutWall);
+
+        linearLayoutThreeD = findViewById(R.id.linearLayoutThreeD);
+        linearLayoutTwoD = findViewById(R.id.linearLayoutTwoD);
+        linearLayoutWall = findViewById(R.id.linearLayoutWall);
+
+        linearLayoutInfo = findViewById(R.id.linearLayoutInfo);
+
+        spinner = findViewById(R.id.spinner);
     }
 
     private void initNavigationBar() {
+        simpleNavigationBarViewHolder = new SimpleNavigationBarViewHolder(this);
+        simpleNavigationBarViewHolder.simpleNavigationBarViewHolderDelegate = new SimpleNavigationBarViewHolder.SimpleNavigationBarViewHolderDelegate() {
+            @Override
+            public void onLeftClick() {
+                onBackPressed();
+            }
+
+            @Override
+            public void onRightClick() {
+
+            }
+        };
+
+        simpleNavigationBarViewHolder.setImageViewLeft(R.drawable.i_back);
+        simpleNavigationBarViewHolder.setImageViewRight(R.drawable.i_more_point);
+        simpleNavigationBarViewHolder.setTitle(roomBean.name);
+
+        frameLayoutNavigationBar.addView(simpleNavigationBarViewHolder.getView());
+    }
+
+    private void setListener() {
+        linearLayoutThreeD.setOnClickListener(view -> {
+            resetTab();
+            horizontalScrollView.smoothScrollTo((int) frameLayout3D.getX(), 0);
+            linearLayoutThreeD.setBackgroundColor(getColor(R.color.light_gray));
+        });
+
+        linearLayoutTwoD.setOnClickListener(view -> {
+            resetTab();
+            horizontalScrollView.smoothScrollTo((int) frameLayout2D.getX(), 0);
+            linearLayoutTwoD.setBackgroundColor(getColor(R.color.light_gray));
+        });
+
+        linearLayoutWall.setOnClickListener(view -> {
+            resetTab();
+            horizontalScrollView.smoothScrollTo((int) frameLayoutWall.getX(), 0);
+            linearLayoutWall.setBackgroundColor(getColor(R.color.light_gray));
+        });
+    }
+
+    private void resetTab() {
+        linearLayoutThreeD.setBackgroundColor(getColor(R.color.white));
+        linearLayoutTwoD.setBackgroundColor(getColor(R.color.white));
+        linearLayoutWall.setBackgroundColor(getColor(R.color.white));
+    }
+
+    private void initSpinner() {
+
+        unitList.clear();
+        unitList.add(getString(R.string.scene_form_unit_m));
+        unitList.add(getString(R.string.scene_form_unit_cm));
+
+        ArrayAdapter arrayAdapter = new ArrayAdapter(this, R.layout.spinner_item_select, unitList.toArray());
+
+        arrayAdapter.setDropDownViewResource(R.layout.spinner_item_drop);
+        spinner.setAdapter(arrayAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                unit = unitList.get(i);
+
+                if(unit.equals("")) {
+                    return;
+                }
+
+                ILog.iLogDebug(TAG, unit);
+
+                if(unit.equals(getString(R.string.scene_form_unit_m))) {
+                    SFConstants.sfUnit = SFConstants.SFUnit.M;
+                }
+                else if(unit.equals(getString(R.string.scene_form_unit_cm))) {
+                    SFConstants.sfUnit = SFConstants.SFUnit.CM;
+                }
+                updateInfo();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
     }
 
@@ -144,6 +264,63 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         else {
             canExit = false;
         }
+    }
+
+    private void initView() {
+        int rect = DisplayUtil.getScreenWidthPx(this) - DisplayUtil.dipToPx(this, 10);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(rect, rect);
+        frameLayout3D.setLayoutParams(layoutParams);
+        frameLayout2D.setLayoutParams(layoutParams);
+        frameLayoutWall.setLayoutParams(layoutParams);
+    }
+
+    private void updateInfo() {
+
+        modelDetailInfoItemViewHolderList.clear();
+        linearLayoutInfo.removeAllViews();
+
+        ModelDetailInfoItemViewHolder modelDetailInfoItemViewHolder;
+
+        modelDetailInfoItemViewHolder = new ModelDetailInfoItemViewHolder(this);
+
+        SpannableStringBuilder areaString = new SpannableStringBuilder(String.format("%.2f", MathTool.getAreaByUnit(SFConstants.sfUnit, roomBean.area)));
+        areaString.append(MathTool.getAreaUnitString(SFConstants.sfUnit)) ;
+
+        modelDetailInfoItemViewHolder.updateView(getString(R.string.scene_form_area_title), areaString);
+        modelDetailInfoItemViewHolderList.add(modelDetailInfoItemViewHolder);
+        linearLayoutInfo.addView(modelDetailInfoItemViewHolder.getView());
+
+
+        modelDetailInfoItemViewHolder = new ModelDetailInfoItemViewHolder(this);
+        modelDetailInfoItemViewHolder.updateView(
+                getString(R.string.scene_form_area_circumference_title),
+                String.format("%.2f", MathTool.getLengthByUnit(SFConstants.sfUnit, roomBean.circumference)) + MathTool.getLengthUnitString(SFConstants.sfUnit));
+        modelDetailInfoItemViewHolderList.add(modelDetailInfoItemViewHolder);
+        linearLayoutInfo.addView(modelDetailInfoItemViewHolder.getView());
+
+        modelDetailInfoItemViewHolder = new ModelDetailInfoItemViewHolder(this);
+        modelDetailInfoItemViewHolder.updateView(
+                getString(R.string.scene_form_area_height_title),
+                String.format("%.2f", MathTool.getLengthByUnit(SFConstants.sfUnit, roomBean.height)) + MathTool.getLengthUnitString(SFConstants.sfUnit)
+        );
+        modelDetailInfoItemViewHolderList.add(modelDetailInfoItemViewHolder);
+        linearLayoutInfo.addView(modelDetailInfoItemViewHolder.getView());
+
+        modelDetailInfoItemViewHolder = new ModelDetailInfoItemViewHolder(this);
+
+        SpannableStringBuilder wallAreaString = new SpannableStringBuilder(String.format("%.2f", MathTool.getAreaByUnit(SFConstants.sfUnit, roomBean.wallArea)));
+        wallAreaString.append(MathTool.getAreaUnitString(SFConstants.sfUnit));
+        modelDetailInfoItemViewHolder.updateView(getString(R.string.scene_form_wall_area_title), wallAreaString);
+        modelDetailInfoItemViewHolderList.add(modelDetailInfoItemViewHolder);
+        linearLayoutInfo.addView(modelDetailInfoItemViewHolder.getView());
+
+        modelDetailInfoItemViewHolder = new ModelDetailInfoItemViewHolder(this);
+        SpannableStringBuilder volumeString = new SpannableStringBuilder(String.format("%.2f", MathTool.getVolumeByUnit(SFConstants.sfUnit, roomBean.volume)));
+        volumeString.append(MathTool.getVolumeUnitString(SFConstants.sfUnit));
+        modelDetailInfoItemViewHolder.updateView(getString(R.string.scene_form_volume_title), volumeString);
+        modelDetailInfoItemViewHolderList.add(modelDetailInfoItemViewHolder);
+        linearLayoutInfo.addView(modelDetailInfoItemViewHolder.getView());
+
     }
 
     @Override

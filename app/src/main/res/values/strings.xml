@@ -1,5 +1,21 @@
 <resources>
     <string name="app_name">SHSceneform3DCode</string>
 
+
+    <string name="scene_form_unit_m">m</string>
+    <string name="scene_form_unit_cm">cm</string>
+
+
     <string name="scene_form_model_list_title">즉정 기록</string>
+
+    <string name="scene_form_input_length_unit">단위선택</string>
+    <string name="scene_form_area_title">면적</string>
+    <string name="scene_form_area_circumference_title">둘레</string>
+    <string name="scene_form_area_height_title">높이</string>
+    <string name="scene_form_wall_area_title">입면면적</string>
+    <string name="scene_form_volume_title">체적</string>
+
+    <string name="scene_form_three_d">3D</string>
+    <string name="scene_form_two_d">도면</string>
+    <string name="scene_form_wall">입면</string>
 </resources>

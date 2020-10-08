@@ -12,67 +12,217 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/navigation_bar_height"/>
 
-    <ScrollView
+    <LinearLayout
+        android:layout_marginTop="@dimen/navigation_bar_height"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch
+            android:id="@+id/horizontalScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:scrollbars="none">
 
-            <com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch
-                android:id="@+id/horizontalScrollView"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="none">
+                android:orientation="horizontal">
 
-                <LinearLayout
+                <FrameLayout
+                    android:layout_gravity="center"
+                    android:id="@+id/frameLayout3D"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"/>
+
+                <FrameLayout
+                    android:layout_marginStart="20dp"
+                    android:layout_gravity="center"
+                    android:id="@+id/frameLayout2D"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"/>
+
+                <FrameLayout
+                    android:layout_marginStart="20dp"
+                    android:layout_gravity="center"
+                    android:id="@+id/frameLayoutWall"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"/>
+
+            </LinearLayout>
+
+        </com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch>
+
+        <LinearLayout
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_gravity="center_horizontal"
+            android:translationZ="5dp"
+            android:background="@color/white"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/linearLayoutThreeD"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_gravity="center_horizontal"
+                    android:padding="10dp"
+                    android:src="@drawable/i_three_d"
+                    android:scaleType="fitCenter"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+                <TextView
+                    android:layout_marginBottom="10dp"
+                    android:textSize="4pt"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/scene_form_three_d"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content"/>
 
-                    <View
-                        android:id="@+id/viewStartSpace"
-                        android:layout_width="5dp"
-                        android:layout_height="400dp"/>
+            </LinearLayout>
 
-                    <FrameLayout
-                        android:layout_gravity="center"
-                        android:id="@+id/frameLayout3D"
-                        android:layout_width="400dp"
-                        android:layout_height="400dp"/>
+            <LinearLayout
+                android:id="@+id/linearLayoutTwoD"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                    <FrameLayout
-                        android:layout_marginStart="10dp"
-                        android:layout_gravity="center"
-                        android:id="@+id/frameLayout2D"
-                        android:layout_width="400dp"
-                        android:layout_height="400dp"/>
+                <ImageView
+                    android:layout_gravity="center_horizontal"
+                    android:padding="10dp"
+                    android:src="@drawable/i_two_d"
+                    android:scaleType="fitCenter"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
 
-                    <FrameLayout
-                        android:layout_marginStart="10dp"
-                        android:layout_gravity="center"
-                        android:id="@+id/frameLayoutWall"
-                        android:layout_width="400dp"
-                        android:layout_height="400dp"/>
+                <TextView
+                    android:layout_marginBottom="10dp"
+                    android:textSize="4pt"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/scene_form_two_d"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
 
-                    <View
-                        android:id="@+id/viewEndSpace"
-                        android:layout_width="5dp"
-                        android:layout_height="400dp"/>
-
-                </LinearLayout>
-
-            </com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch>
+            </LinearLayout>
 
 
+            <LinearLayout
+                android:id="@+id/linearLayoutWall"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_gravity="center_horizontal"
+                    android:padding="10dp"
+                    android:src="@drawable/i_wall"
+                    android:scaleType="fitCenter"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+                <TextView
+                    android:layout_marginBottom="10dp"
+                    android:textSize="4pt"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/scene_form_wall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
 
 
         </LinearLayout>
 
-    </ScrollView>
+        <View
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/pale_grey"
+            android:layout_width="match_parent"
+            android:layout_height="0.8dp"/>
+
+        <LinearLayout
+            android:layout_marginBottom="10dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:textSize="6pt"
+                android:layout_gravity="center_vertical"
+                android:text="@string/scene_form_input_length_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/drag_down_menu_bg"
+                android:paddingTop="1dp"
+                android:paddingBottom="1dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:dropDownWidth="80dp"
+                    android:background="@null"
+                    android:layout_gravity="center_vertical"
+                    android:id="@+id/spinner"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"/>
+
+                <ImageView
+                    android:layout_marginStart="10dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/i_dropdown"
+                    android:scaleType="fitCenter"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ScrollView
+            android:translationZ="5dp"
+            android:background="@color/white"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/linearLayoutInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            </LinearLayout>
+
+        </ScrollView>
+
+
+    </LinearLayout>
 
 
 </FrameLayout>
