@@ -45,6 +45,12 @@
         android:translationZ="5dp" />
 
     <FrameLayout
+        android:id="@+id/frameLayoutPopup"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <FrameLayout
         android:visibility="gone"
         android:id="@+id/frameLayoutProgress"
         android:layout_width="match_parent"

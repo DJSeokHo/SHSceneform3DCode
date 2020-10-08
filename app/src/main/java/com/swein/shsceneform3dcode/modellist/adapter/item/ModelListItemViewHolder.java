@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
+import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.EventCenter;
+import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
 import com.swein.shsceneform3dcode.framework.util.glide.SHGlide;
 import com.swein.shsceneform3dcode.modeldetailinfo.ModelDetailInfoActivity;
 import com.swein.shsceneform3dcode.sceneformpart.SceneFormViewHolder;
@@ -20,6 +22,7 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
 
@@ -48,7 +51,10 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
 
     private void setListener() {
         imageViewEditName.setOnClickListener(view -> {
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("roomBean", roomBean);
 
+            EventCenter.instance.sendEvent(ESSArrows.EDIT_NAME, this, hashMap);
         });
 
         view.get().setOnClickListener(view -> {

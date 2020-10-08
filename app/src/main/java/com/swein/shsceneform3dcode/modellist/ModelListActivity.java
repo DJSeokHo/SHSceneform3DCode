@@ -12,8 +12,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.button.MaterialButton;
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.commonui.navigation.SceneFormNavigationBarViewHolder;
+import com.swein.shsceneform3dcode.commonui.popup.SimpleOneInputTwoBottomPopupViewHolder;
 import com.swein.shsceneform3dcode.framework.module.basicpermission.BasicPermissionActivity;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
+import com.swein.shsceneform3dcode.framework.util.animation.AnimationUtil;
 import com.swein.shsceneform3dcode.framework.util.debug.ILog;
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.EventCenter;
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
@@ -46,6 +48,9 @@ public class ModelListActivity extends BasicPermissionActivity {
     private RoomBean roomBean;
 
     private MaterialButton materialButtonPlus;
+
+    private FrameLayout frameLayoutPopup;
+    private SimpleOneInputTwoBottomPopupViewHolder simpleOneInputTwoBottomPopupViewHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +107,11 @@ public class ModelListActivity extends BasicPermissionActivity {
             ThreadUtil.startUIThread(0, this::insert);
 
         });
+
+        EventCenter.instance.addEventObserver(ESSArrows.EDIT_NAME, this, (arrow, poster, data) -> {
+            RoomBean roomBean = (RoomBean) data.get("roomBean");
+            showEditNamePopup(roomBean);
+        });
     }
 
     private void findView() {
@@ -112,6 +122,8 @@ public class ModelListActivity extends BasicPermissionActivity {
         frameLayoutProgress = findViewById(R.id.frameLayoutProgress);
 
         materialButtonPlus = findViewById(R.id.materialButtonPlus);
+
+        frameLayoutPopup = findViewById(R.id.frameLayoutPopup);
     }
 
     private void initNavigationBar() {
@@ -196,6 +208,42 @@ public class ModelListActivity extends BasicPermissionActivity {
 
     private void loadMore() {
 
+    }
+
+    private void showEditNamePopup(RoomBean roomBean) {
+
+        frameLayoutPopup.removeAllViews();
+        simpleOneInputTwoBottomPopupViewHolder = new SimpleOneInputTwoBottomPopupViewHolder(this);
+        simpleOneInputTwoBottomPopupViewHolder.setString(roomBean.name);
+        simpleOneInputTwoBottomPopupViewHolder.simpleOneInputTwoBottomPopupViewHolderDelegate = new SimpleOneInputTwoBottomPopupViewHolder.SimpleOneInputTwoBottomPopupViewHolderDelegate() {
+            @Override
+            public void onConfirm() {
+
+                // TODO edit name
+
+                hideEditNamePopup();
+            }
+
+            @Override
+            public void onClose() {
+                hideEditNamePopup();
+            }
+        };
+
+        frameLayoutPopup.addView(simpleOneInputTwoBottomPopupViewHolder.getView());
+        frameLayoutPopup.startAnimation(AnimationUtil.show(this));
+        frameLayoutPopup.setVisibility(View.VISIBLE);
+    }
+
+    private void hideEditNamePopup() {
+        if(simpleOneInputTwoBottomPopupViewHolder != null) {
+             frameLayoutPopup.startAnimation(AnimationUtil.hide(this));
+             frameLayoutPopup.setVisibility(View.GONE);
+             ThreadUtil.startUIThread(300, () -> {
+                 frameLayoutPopup.removeAllViews();
+                 simpleOneInputTwoBottomPopupViewHolder = null;
+             });
+        }
     }
 
     private void showProgress() {
