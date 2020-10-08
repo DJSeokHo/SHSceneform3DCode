@@ -50,7 +50,7 @@ public class ModelListActivity extends BasicPermissionActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(R.anim.activity_slide_right_in, R.anim.activity_slide_left_out);
+        overridePendingTransition(R.anim.activity_from_bottom, R.anim.activity_no_slide);
         setContentView(R.layout.activity_model_list);
 
         ThemeUtil.setWindowStatusBarColor(this, Color.WHITE);
@@ -68,9 +68,7 @@ public class ModelListActivity extends BasicPermissionActivity {
     @Override
     public void finish() {
         super.finish();
-        // when activity finish, current activity will slide_right_out(left in screen to right)
-        // and old activity will slide_left_in(show in screen from left)
-        overridePendingTransition(R.anim.activity_slide_left_in, R.anim.activity_slide_right_out);
+        overridePendingTransition(R.anim.activity_no_slide, R.anim.activity_out_bottom);
     }
 
     private void checkBundle() {
