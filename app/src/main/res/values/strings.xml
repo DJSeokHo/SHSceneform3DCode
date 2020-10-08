@@ -12,7 +12,7 @@
     <string name="scene_form_unit_cm">cm</string>
 
 
-    <string name="scene_form_model_list_title">즉정 기록</string>
+    <string name="scene_form_model_list_title">측정 기록</string>
 
     <string name="scene_form_input_length_unit">단위선택</string>
     <string name="scene_form_area_title">면적</string>
