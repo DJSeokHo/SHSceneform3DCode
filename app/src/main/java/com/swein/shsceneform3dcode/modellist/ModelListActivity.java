@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.button.MaterialButton;
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.commonui.navigation.SceneFormNavigationBarViewHolder;
 import com.swein.shsceneform3dcode.framework.module.basicpermission.BasicPermissionActivity;
@@ -43,6 +44,8 @@ public class ModelListActivity extends BasicPermissionActivity {
     private FrameLayout frameLayoutNavigationBar;
 
     private RoomBean roomBean;
+
+    private MaterialButton materialButtonPlus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +112,8 @@ public class ModelListActivity extends BasicPermissionActivity {
 
         frameLayoutNavigationBar = findViewById(R.id.frameLayoutNavigationBar);
         frameLayoutProgress = findViewById(R.id.frameLayoutProgress);
+
+        materialButtonPlus = findViewById(R.id.materialButtonPlus);
     }
 
     private void initNavigationBar() {
@@ -139,6 +144,10 @@ public class ModelListActivity extends BasicPermissionActivity {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             swipeRefreshLayout.setRefreshing(false);
             reload();
+        });
+
+        materialButtonPlus.setOnClickListener(view -> {
+            ILog.iLogDebug(TAG, "add");
         });
     }
 

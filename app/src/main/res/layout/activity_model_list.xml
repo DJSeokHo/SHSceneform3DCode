@@ -25,6 +25,25 @@
             android:scrollbars="none"/>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/materialButtonPlus"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="end|bottom"
+        android:layout_marginBottom="25dp"
+        android:layout_marginEnd="25dp"
+        app:cornerRadius="500dp"
+        app:backgroundTint="@color/app_basic_color"
+        app:iconTint="@color/white"
+        app:iconPadding="0dp"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        app:iconGravity="textStart"
+        app:icon="@drawable/i_plus_sf"
+        android:translationZ="5dp" />
+
     <FrameLayout
         android:visibility="gone"
         android:id="@+id/frameLayoutProgress"

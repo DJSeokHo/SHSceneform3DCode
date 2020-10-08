@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 
 import androidx.fragment.app.FragmentActivity;
@@ -147,7 +148,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
             @Override
             public void onRightClick() {
-
+                showPopupMenu(simpleNavigationBarViewHolder.getRightImageView());
             }
         };
 
@@ -162,19 +163,19 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         linearLayoutThreeD.setOnClickListener(view -> {
             resetTab();
             horizontalScrollView.smoothScrollTo((int) frameLayout3D.getX(), 0);
-            linearLayoutThreeD.setBackgroundColor(getColor(R.color.light_gray));
+            linearLayoutThreeD.setBackgroundColor(getColor(R.color.pale_grey));
         });
 
         linearLayoutTwoD.setOnClickListener(view -> {
             resetTab();
             horizontalScrollView.smoothScrollTo((int) frameLayout2D.getX(), 0);
-            linearLayoutTwoD.setBackgroundColor(getColor(R.color.light_gray));
+            linearLayoutTwoD.setBackgroundColor(getColor(R.color.pale_grey));
         });
 
         linearLayoutWall.setOnClickListener(view -> {
             resetTab();
             horizontalScrollView.smoothScrollTo((int) frameLayoutWall.getX(), 0);
-            linearLayoutWall.setBackgroundColor(getColor(R.color.light_gray));
+            linearLayoutWall.setBackgroundColor(getColor(R.color.pale_grey));
         });
     }
 
@@ -321,6 +322,37 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         modelDetailInfoItemViewHolderList.add(modelDetailInfoItemViewHolder);
         linearLayoutInfo.addView(modelDetailInfoItemViewHolder.getView());
 
+    }
+
+    private void showPopupMenu(View fromView) {
+
+        PopupMenu popupMenu = new PopupMenu(this, fromView);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_scene_form_model_detail_self, popupMenu.getMenu());
+
+        popupMenu.show();
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+
+            switch (item.getItemId()) {
+                case R.id.share: {
+                    // TODO
+                    ILog.iLogDebug(TAG, "share");
+
+                    break;
+                }
+                case R.id.delete: {
+                    // TODO
+                    ILog.iLogDebug(TAG, "delete");
+
+                    break;
+                }
+
+            }
+            return true;
+        });
+        popupMenu.setOnDismissListener(menu -> {
+
+        });
     }
 
     @Override

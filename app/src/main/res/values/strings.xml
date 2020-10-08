@@ -2,6 +2,9 @@
     <string name="app_name">SHSceneform3DCode</string>
 
 
+    <string name="scene_form_pop_menu_share">공유가히</string>
+    <string name="scene_form_pop_menu_delete">삭제</string>
+
     <string name="scene_form_unit_m">m</string>
     <string name="scene_form_unit_cm">cm</string>
 
