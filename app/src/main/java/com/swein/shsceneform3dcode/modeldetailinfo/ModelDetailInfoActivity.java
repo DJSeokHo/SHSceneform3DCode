@@ -17,10 +17,14 @@ import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch;
 import com.swein.shsceneform3dcode.commonui.navigation.SimpleNavigationBarViewHolder;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
+import com.swein.shsceneform3dcode.framework.util.animation.AnimationUtil;
 import com.swein.shsceneform3dcode.framework.util.debug.ILog;
 import com.swein.shsceneform3dcode.framework.util.display.DisplayUtil;
+import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.EventCenter;
+import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
 import com.swein.shsceneform3dcode.framework.util.theme.ThemeUtil;
 import com.swein.shsceneform3dcode.framework.util.thread.ThreadUtil;
+import com.swein.shsceneform3dcode.modeldetailinfo.confirmshare.ConfirmModelInfoShareViewHolder;
 import com.swein.shsceneform3dcode.modeldetailinfo.item.ModelDetailInfoItemViewHolder;
 import com.swein.shsceneform3dcode.sceneformpart.SceneFormViewHolder;
 import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
@@ -67,6 +71,9 @@ public class ModelDetailInfoActivity extends FragmentActivity {
     private String unit;
     private List<String> unitList = new ArrayList<>();
 
+    private FrameLayout frameLayoutPopup;
+    private ConfirmModelInfoShareViewHolder confirmModelInfoShareViewHolder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +84,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         ThemeUtil.setAndroidNativeLightStatusBar(this, true, false);
 
         checkBundle();
+        initESS();
         findView();
         setListener();
         initNavigationBar();
@@ -120,6 +128,13 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         }
     }
 
+    private void initESS() {
+        EventCenter.instance.addEventObserver(ESSArrows.UPDATE_2D_IMAGE, this, (arrow, poster, data) -> {
+
+            roomBean.thumbnailImage = (String) data.get("filePath");
+        });
+    }
+
     private void findView() {
 
         frameLayoutNavigationBar = findViewById(R.id.frameLayoutNavigationBar);
@@ -136,6 +151,8 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         linearLayoutInfo = findViewById(R.id.linearLayoutInfo);
 
         spinner = findViewById(R.id.spinner);
+
+        frameLayoutPopup = findViewById(R.id.frameLayoutPopup);
     }
 
     private void initNavigationBar() {
@@ -335,9 +352,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
             switch (item.getItemId()) {
                 case R.id.share: {
-                    // TODO
-                    ILog.iLogDebug(TAG, "share");
-
+                    showConfirmModelInfoPopup();
                     break;
                 }
                 case R.id.delete: {
@@ -355,8 +370,57 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         });
     }
 
+    private void showConfirmModelInfoPopup() {
+        frameLayoutPopup.removeAllViews();
+        confirmModelInfoShareViewHolder = new ConfirmModelInfoShareViewHolder(this);
+        confirmModelInfoShareViewHolder.roomBean = roomBean;
+        confirmModelInfoShareViewHolder.confirmModelInfoPopupViewHolderDelegate = new ConfirmModelInfoShareViewHolder.ConfirmModelInfoPopupViewHolderDelegate() {
+            @Override
+            public void onImage() {
+
+            }
+
+            @Override
+            public void onPdf() {
+
+            }
+
+            @Override
+            public void onClose() {
+                hideConfirmModelInfoPopup();
+            }
+        };
+
+        confirmModelInfoShareViewHolder.updateView();
+        frameLayoutPopup.addView(confirmModelInfoShareViewHolder.getView());
+        frameLayoutPopup.startAnimation(AnimationUtil.show(this));
+        frameLayoutPopup.setVisibility(View.VISIBLE);
+    }
+
+    private boolean hideConfirmModelInfoPopup() {
+        if(confirmModelInfoShareViewHolder != null) {
+
+            frameLayoutPopup.startAnimation(AnimationUtil.hide(this));
+            frameLayoutPopup.setVisibility(View.GONE);
+            ThreadUtil.startUIThread(300, () -> {
+                frameLayoutPopup.removeAllViews();
+                if(confirmModelInfoShareViewHolder != null) {
+                    confirmModelInfoShareViewHolder.destroy();
+                }
+                confirmModelInfoShareViewHolder = null;
+            });
+
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void onBackPressed() {
+
+        if(hideConfirmModelInfoPopup()) {
+            return;
+        }
 
         if(canExit) {
             finish();
@@ -398,6 +462,10 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         }
     }
 
+    private void removeESS() {
+        EventCenter.instance.removeAllObserver(this);
+    }
+
     @Override
     protected void onDestroy() {
 
@@ -415,6 +483,8 @@ public class ModelDetailInfoActivity extends FragmentActivity {
             sceneFormViewHolderWall.destroy();
             sceneFormViewHolderWall = null;
         }
+
+        removeESS();
         super.onDestroy();
     }
 }

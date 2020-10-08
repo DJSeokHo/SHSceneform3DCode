@@ -1,6 +1,5 @@
 package com.swein.shsceneform3dcode.modellist.adapter.item;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,7 +19,6 @@ import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 
 import org.json.JSONException;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
@@ -76,7 +74,7 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
         textViewName.setText(roomBean.name);
 
         if(!roomBean.thumbnailImage.equals("")) {
-            imageView.post(() -> SHGlide.instance.setImageBitmap(view.get().getContext(), Uri.fromFile(new File(roomBean.thumbnailImage)), imageView, null, imageView.getWidth(), imageView.getHeight(), 0f, 0f));
+            imageView.post(() -> SHGlide.instance.setImageBitmap(view.get().getContext(), roomBean.thumbnailImage, imageView, null, imageView.getWidth(), imageView.getHeight(), 0f, 0f));
         }
 
     }

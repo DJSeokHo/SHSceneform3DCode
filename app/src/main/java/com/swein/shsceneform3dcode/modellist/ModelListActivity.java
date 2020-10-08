@@ -235,7 +235,7 @@ public class ModelListActivity extends BasicPermissionActivity {
         frameLayoutPopup.setVisibility(View.VISIBLE);
     }
 
-    private void hideEditNamePopup() {
+    private boolean hideEditNamePopup() {
         if(simpleOneInputTwoBottomPopupViewHolder != null) {
              frameLayoutPopup.startAnimation(AnimationUtil.hide(this));
              frameLayoutPopup.setVisibility(View.GONE);
@@ -243,7 +243,11 @@ public class ModelListActivity extends BasicPermissionActivity {
                  frameLayoutPopup.removeAllViews();
                  simpleOneInputTwoBottomPopupViewHolder = null;
              });
+
+             return true;
         }
+
+        return false;
     }
 
     private void showProgress() {
@@ -256,11 +260,21 @@ public class ModelListActivity extends BasicPermissionActivity {
 
     @Override
     public void onBackPressed() {
+
+        if(hideEditNamePopup()) {
+            return;
+        }
+
         finish();
+    }
+
+    private void removeESS() {
+        EventCenter.instance.removeAllObserver(this);
     }
 
     @Override
     protected void onDestroy() {
+        removeESS();
         super.onDestroy();
     }
 }
