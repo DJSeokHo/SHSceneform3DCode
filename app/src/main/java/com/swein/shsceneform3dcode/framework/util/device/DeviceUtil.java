@@ -135,4 +135,12 @@ public class DeviceUtil {
         context.startActivity(Intent.createChooser(shareIntent, chooserText));
 
     }
+
+    public static void shareText(Context context, String text, String subject, String chooserText) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        context.startActivity(Intent.createChooser(intent, chooserText));
+    }
 }
