@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.swein.shsceneform3dcode.R;
+import com.swein.shsceneform3dcode.bean.ModelWrapperItemBean;
 import com.swein.shsceneform3dcode.modellist.adapter.item.ModelListItemViewHolder;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 
@@ -20,7 +21,7 @@ public class ModelListAdapter extends RecyclerView.Adapter {
         void loadMore();
     }
 
-    private List<RoomBean> roomBeanList = new ArrayList<>();
+    private List<ModelWrapperItemBean> modelWrapperItemBeanList = new ArrayList<>();
 
     private static final int TYPE_ITEM_NORMAL_LIST = 0;
 
@@ -33,14 +34,14 @@ public class ModelListAdapter extends RecyclerView.Adapter {
         return new ModelListItemViewHolder(view);
     }
 
-    public void loadMoreList(List<RoomBean> roomBeanList) {
-        this.roomBeanList.addAll(roomBeanList);
-        notifyItemRangeChanged(this.roomBeanList.size() - roomBeanList.size() + 1, roomBeanList.size());
+    public void loadMoreList(List<ModelWrapperItemBean> modelWrapperItemBeanList) {
+        this.modelWrapperItemBeanList.addAll(modelWrapperItemBeanList);
+        notifyItemRangeChanged(this.modelWrapperItemBeanList.size() - modelWrapperItemBeanList.size() + 1, modelWrapperItemBeanList.size());
 
     }
 
-    public void insert(RoomBean roomBean) {
-        this.roomBeanList.add(0, roomBean);
+    public void insert(ModelWrapperItemBean modelWrapperItemBean) {
+        this.modelWrapperItemBeanList.add(modelWrapperItemBean);
         notifyItemInserted(0);
     }
 
@@ -48,10 +49,10 @@ public class ModelListAdapter extends RecyclerView.Adapter {
 
     }
 
-    public void reloadList(List<RoomBean> roomBeanList) {
+    public void reloadList(List<ModelWrapperItemBean> modelWrapperItemBeanList) {
 
-        this.roomBeanList.clear();
-        this.roomBeanList.addAll(roomBeanList);
+        this.modelWrapperItemBeanList.clear();
+        this.modelWrapperItemBeanList.addAll(modelWrapperItemBeanList);
 
         notifyDataSetChanged();
     }
@@ -60,17 +61,17 @@ public class ModelListAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ModelListItemViewHolder) {
             ModelListItemViewHolder modelListItemViewHolder = (ModelListItemViewHolder) holder;
-            modelListItemViewHolder.roomBean = roomBeanList.get(position);
+            modelListItemViewHolder.modelWrapperItemBean = modelWrapperItemBeanList.get(position);
             modelListItemViewHolder.updateView();
         }
 
-        if(position == roomBeanList.size() - 1) {
+        if(position == modelWrapperItemBeanList.size() - 1) {
             modelListAdapterDelegate.loadMore();
         }
     }
 
     @Override
     public int getItemCount() {
-        return roomBeanList.size();
+        return modelWrapperItemBeanList.size();
     }
 }

@@ -8,7 +8,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.Spinner;
 
 import androidx.fragment.app.FragmentActivity;
@@ -16,6 +15,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch;
 import com.swein.shsceneform3dcode.commonui.navigation.SimpleNavigationBarViewHolder;
+import com.swein.shsceneform3dcode.constants.WebConstants;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
 import com.swein.shsceneform3dcode.framework.util.animation.AnimationUtil;
 import com.swein.shsceneform3dcode.framework.util.debug.ILog;
@@ -24,6 +24,7 @@ import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.Eve
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
 import com.swein.shsceneform3dcode.framework.util.theme.ThemeUtil;
 import com.swein.shsceneform3dcode.framework.util.thread.ThreadUtil;
+import com.swein.shsceneform3dcode.model.SceneFormModel;
 import com.swein.shsceneform3dcode.modeldetailinfo.confirmshare.ConfirmModelInfoShareViewHolder;
 import com.swein.shsceneform3dcode.modeldetailinfo.item.ModelDetailInfoItemViewHolder;
 import com.swein.shsceneform3dcode.sceneformpart.SceneFormViewHolder;
@@ -31,9 +32,9 @@ import com.swein.shsceneform3dcode.sceneformpart.constants.SFConstants;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 import com.swein.shsceneform3dcode.sceneformpart.tool.MathTool;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +54,8 @@ public class ModelDetailInfoActivity extends FragmentActivity {
     private SceneFormViewHolder sceneFormViewHolderWall;
 
     private RoomBean roomBean;
+    private boolean isNew = false;
+
 
     private CustomHorizontalScrollViewDisableTouch horizontalScrollView;
 
@@ -74,6 +77,11 @@ public class ModelDetailInfoActivity extends FragmentActivity {
     private FrameLayout frameLayoutPopup;
     private ConfirmModelInfoShareViewHolder confirmModelInfoShareViewHolder;
 
+    private FrameLayout frameLayoutProgress;
+
+    private String testToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3OTIiLCJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWF0IjoxNjAwNDI0NTUyLCJleHAiOjE2MzE5NjA1NTJ9.HDiUJ3eepXQLs4OVak7wgF_dgGkNxxOQ4RzY4Vd_XHw";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,11 +92,10 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         ThemeUtil.setAndroidNativeLightStatusBar(this, true, false);
 
         checkBundle();
-        initESS();
         findView();
         setListener();
         initNavigationBar();
-        updateState();
+
         initView();
 
         initSceneForm();
@@ -108,31 +115,29 @@ public class ModelDetailInfoActivity extends FragmentActivity {
     private void checkBundle() {
         Bundle bundle = getIntent().getBundleExtra(ActivityUtil.BUNDLE_KEY);
         if(bundle != null) {
-            String string = bundle.getString("roomBean", "");
-            if(string.equals("")) {
-                finish();
-            }
 
-            try {
-                JSONObject jsonObject = new JSONObject(string);
-                roomBean = new RoomBean();
-                roomBean.init(jsonObject);
-            }
-            catch (JSONException e) {
-                e.printStackTrace();
+            isNew = bundle.getBoolean("isNew", false);
+
+            String roomBeanJSONObjectString = bundle.getString("roomBean", "");
+            if(roomBeanJSONObjectString.equals("")) {
                 finish();
+            }
+            else {
+
+                try {
+                    roomBean = new RoomBean();
+                    JSONObject jsonObject = new JSONObject(roomBeanJSONObjectString);
+                    roomBean.init(jsonObject);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    finish();
+                }
             }
         }
         else {
             finish();
         }
-    }
-
-    private void initESS() {
-        EventCenter.instance.addEventObserver(ESSArrows.UPDATE_2D_IMAGE, this, (arrow, poster, data) -> {
-
-            roomBean.thumbnailImage = (String) data.get("filePath");
-        });
     }
 
     private void findView() {
@@ -153,6 +158,8 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         spinner = findViewById(R.id.spinner);
 
         frameLayoutPopup = findViewById(R.id.frameLayoutPopup);
+
+        frameLayoutProgress = findViewById(R.id.frameLayoutProgress);
     }
 
     private void initNavigationBar() {
@@ -165,12 +172,12 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
             @Override
             public void onRightClick() {
-                showPopupMenu(simpleNavigationBarViewHolder.getRightImageView());
+                showConfirmModelInfoPopup();
             }
         };
 
         simpleNavigationBarViewHolder.setImageViewLeft(R.drawable.i_back);
-        simpleNavigationBarViewHolder.setImageViewRight(R.drawable.i_more_point);
+        simpleNavigationBarViewHolder.setImageViewRight(R.drawable.i_share);
         simpleNavigationBarViewHolder.setTitle(roomBean.name);
 
         frameLayoutNavigationBar.addView(simpleNavigationBarViewHolder.getView());
@@ -246,21 +253,52 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         sceneFormViewHolder3D = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_3D, null);
         frameLayout3D.addView(sceneFormViewHolder3D.view);
 
-        sceneFormViewHolder2D = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_2D, () -> {
-            if(roomBean.thumbnailImage.equals("")) {
+        sceneFormViewHolder2D = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_2D, new SceneFormViewHolder.SceneFormViewHolderDelegate() {
+            @Override
+            public void onLoadModelFinish() {
+                if(isNew) {
 
-                ThreadUtil.startThread(() -> {
+                    ThreadUtil.startThread(() -> {
+                        try {
+                            Thread.sleep(1000);
+
+                            ThreadUtil.startUIThread(0, () -> captureThumbnailImage());
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+                else {
+
+                    ThreadUtil.startThread(() -> {
+                        try {
+                            Thread.sleep(1000);
+                            canExit = true;
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCaptureFinished(String filePath) {
+
+                ThreadUtil.startUIThread(0, () -> {
                     try {
-                        Thread.sleep(1000);
-
-                        ThreadUtil.startUIThread(0, this::captureThumbnailImage);
-
-                    } catch (InterruptedException e) {
+                        uploadModel(filePath);
+                    }
+                    catch (Exception e) {
                         e.printStackTrace();
                     }
                 });
             }
         });
+
+
+
         frameLayout2D.addView(sceneFormViewHolder2D.view);
 
         sceneFormViewHolderWall = new SceneFormViewHolder(this, roomBean, SceneFormViewHolder.TYPE_WALL, null);
@@ -272,15 +310,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
             sceneFormViewHolder2D.captureThumbnailImage(this::finish);
 
             canExit = true;
-        }
-    }
-
-    private void updateState() {
-        if(!roomBean.thumbnailImage.equals("")) {
-            canExit = true;
-        }
-        else {
-            canExit = false;
         }
     }
 
@@ -341,34 +370,65 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
     }
 
-    private void showPopupMenu(View fromView) {
+    private void uploadModel(String filePath) throws Exception {
+        showProgress();
 
-        PopupMenu popupMenu = new PopupMenu(this, fromView);
-        popupMenu.getMenuInflater().inflate(R.menu.menu_scene_form_model_detail_self, popupMenu.getMenu());
+        SceneFormModel.instance.requestUploadModel(testToken, roomBean.name,
+                URLEncoder.encode(roomBean.toJSONObject().toString(), "UTF-8"), filePath, new SceneFormModel.SceneFormModelDelegate() {
+            @Override
+            public void onResponse(String response) {
+                ILog.iLogDebug(TAG, response);
 
-        popupMenu.show();
+                try {
 
-        popupMenu.setOnMenuItemClickListener(item -> {
+                    if(WebConstants.getIsSuccess(response)) {
 
-            switch (item.getItemId()) {
-                case R.id.share: {
-                    showConfirmModelInfoPopup();
-                    break;
+                        ThreadUtil.startUIThread(0, () -> EventCenter.instance.sendEvent(ESSArrows.UPDATE_MODEL_FINISHED, this, null));
+                    }
                 }
-                case R.id.delete: {
-                    // TODO
-                    ILog.iLogDebug(TAG, "delete");
-
-                    break;
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
 
+                ThreadUtil.startUIThread(0, () -> hideProgress());
             }
-            return true;
-        });
-        popupMenu.setOnDismissListener(menu -> {
 
+            @Override
+            public void onException(Exception e) {
+                e.printStackTrace();
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
         });
     }
+
+//    private void showPopupMenu(View fromView) {
+//
+//        PopupMenu popupMenu = new PopupMenu(this, fromView);
+//        popupMenu.getMenuInflater().inflate(R.menu.menu_scene_form_model_detail_self, popupMenu.getMenu());
+//
+//        popupMenu.show();
+//
+//        popupMenu.setOnMenuItemClickListener(item -> {
+//
+//            switch (item.getItemId()) {
+//                case R.id.share: {
+//                    showConfirmModelInfoPopup();
+//                    break;
+//                }
+//                case R.id.delete: {
+//                    // TODO
+//                    ILog.iLogDebug(TAG, "delete");
+//
+//                    break;
+//                }
+//
+//            }
+//            return true;
+//        });
+//        popupMenu.setOnDismissListener(menu -> {
+//
+//        });
+//    }
 
     private void showConfirmModelInfoPopup() {
         frameLayoutPopup.removeAllViews();
@@ -413,6 +473,14 @@ public class ModelDetailInfoActivity extends FragmentActivity {
             return true;
         }
         return false;
+    }
+
+    private void showProgress() {
+        frameLayoutProgress.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgress() {
+        frameLayoutProgress.setVisibility(View.GONE);
     }
 
     @Override
@@ -462,10 +530,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         }
     }
 
-    private void removeESS() {
-        EventCenter.instance.removeAllObserver(this);
-    }
-
     @Override
     protected void onDestroy() {
 
@@ -484,7 +548,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
             sceneFormViewHolderWall = null;
         }
 
-        removeESS();
         super.onDestroy();
     }
 }

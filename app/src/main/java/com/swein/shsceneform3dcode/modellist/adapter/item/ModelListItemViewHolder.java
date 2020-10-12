@@ -9,15 +9,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.swein.shsceneform3dcode.R;
+import com.swein.shsceneform3dcode.bean.ModelWrapperItemBean;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.EventCenter;
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
 import com.swein.shsceneform3dcode.framework.util.glide.SHGlide;
 import com.swein.shsceneform3dcode.modeldetailinfo.ModelDetailInfoActivity;
 import com.swein.shsceneform3dcode.sceneformpart.SceneFormViewHolder;
-import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
-
-import org.json.JSONException;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -26,7 +24,7 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
 
     private WeakReference<View> view;
 
-    public RoomBean roomBean;
+    public ModelWrapperItemBean modelWrapperItemBean;
 
     private TextView textViewName;
     private ImageView imageViewEditName;
@@ -50,19 +48,20 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
     private void setListener() {
         imageViewEditName.setOnClickListener(view -> {
             HashMap<String, Object> hashMap = new HashMap<>();
-            hashMap.put("roomBean", roomBean);
+            hashMap.put("modelWrapperItemBean", modelWrapperItemBean);
 
             EventCenter.instance.sendEvent(ESSArrows.EDIT_NAME, this, hashMap);
         });
 
         view.get().setOnClickListener(view -> {
+
             try {
-                String string = roomBean.toJSONObject().toString();
                 Bundle bundle = new Bundle();
-                bundle.putString("roomBean", string);
+                bundle.putString("roomBean", modelWrapperItemBean.roomBean.toJSONObject().toString());
+                bundle.putBoolean("isNew", false);
                 ActivityUtil.startNewActivityWithoutFinish(view.getContext(), ModelDetailInfoActivity.class, bundle);
             }
-            catch (JSONException e) {
+            catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -71,10 +70,10 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
 
     public void updateView() {
 
-        textViewName.setText(roomBean.name);
+        textViewName.setText(modelWrapperItemBean.name);
 
-        if(!roomBean.thumbnailImage.equals("")) {
-            imageView.post(() -> SHGlide.instance.setImageBitmap(view.get().getContext(), roomBean.thumbnailImage, imageView, null, imageView.getWidth(), imageView.getHeight(), 0f, 0f));
+        if(!modelWrapperItemBean.imgUrl.equals("")) {
+            imageView.post(() -> SHGlide.instance.setImageBitmap(view.get().getContext(), modelWrapperItemBean.imgUrl, imageView, null, imageView.getWidth(), imageView.getHeight(), 0f, 0f));
         }
 
     }

@@ -25,7 +25,7 @@
     <ImageView
         android:padding="12dp"
         android:id="@+id/imageViewEditName"
-        android:src="@drawable/i_edit"
+        android:src="@drawable/i_more_point"
         android:scaleType="fitCenter"
         android:layout_marginEnd="10dp"
         android:layout_gravity="end|center_vertical"

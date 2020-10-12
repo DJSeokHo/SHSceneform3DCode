@@ -11,8 +11,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.button.MaterialButton;
 import com.swein.shsceneform3dcode.R;
+import com.swein.shsceneform3dcode.bean.ModelWrapperItemBean;
 import com.swein.shsceneform3dcode.commonui.navigation.SceneFormNavigationBarViewHolder;
 import com.swein.shsceneform3dcode.commonui.popup.SimpleOneInputTwoBottomPopupViewHolder;
+import com.swein.shsceneform3dcode.constants.WebConstants;
 import com.swein.shsceneform3dcode.framework.module.basicpermission.BasicPermissionActivity;
 import com.swein.shsceneform3dcode.framework.util.activity.ActivityUtil;
 import com.swein.shsceneform3dcode.framework.util.animation.AnimationUtil;
@@ -21,10 +23,12 @@ import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.Eve
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
 import com.swein.shsceneform3dcode.framework.util.theme.ThemeUtil;
 import com.swein.shsceneform3dcode.framework.util.thread.ThreadUtil;
+import com.swein.shsceneform3dcode.model.SceneFormModel;
 import com.swein.shsceneform3dcode.modeldetailinfo.ModelDetailInfoActivity;
 import com.swein.shsceneform3dcode.modellist.adapter.ModelListAdapter;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,6 +56,8 @@ public class ModelListActivity extends BasicPermissionActivity {
     private FrameLayout frameLayoutPopup;
     private SimpleOneInputTwoBottomPopupViewHolder simpleOneInputTwoBottomPopupViewHolder;
 
+    private String testToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3OTIiLCJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWF0IjoxNjAwNDI0NTUyLCJleHAiOjE2MzE5NjA1NTJ9.HDiUJ3eepXQLs4OVak7wgF_dgGkNxxOQ4RzY4Vd_XHw";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +74,8 @@ public class ModelListActivity extends BasicPermissionActivity {
         setListener();
         initList();
         reload();
+
+        openDetail();
     }
 
     @Override
@@ -80,37 +88,28 @@ public class ModelListActivity extends BasicPermissionActivity {
         Bundle bundle = getIntent().getBundleExtra(ActivityUtil.BUNDLE_KEY);
         if(bundle != null) {
             String string = bundle.getString("roomBean", "");
-            if(string.equals("")) {
-                finish();
+            if(!string.equals("")) {
+                try {
+                    JSONObject jsonObject = new JSONObject(string);
+                    roomBean = new RoomBean();
+                    roomBean.init(jsonObject);
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                    finish();
+                }
             }
-
-            try {
-                JSONObject jsonObject = new JSONObject(string);
-                roomBean = new RoomBean();
-                roomBean.init(jsonObject);
-            }
-            catch (JSONException e) {
-                e.printStackTrace();
-                finish();
-            }
-        }
-        else {
-            finish();
         }
     }
 
     private void initESS() {
-        EventCenter.instance.addEventObserver(ESSArrows.UPDATE_2D_IMAGE, this, (arrow, poster, data) -> {
-
-            roomBean.thumbnailImage = (String) data.get("filePath");
-
-            ThreadUtil.startUIThread(0, this::insert);
-
+        EventCenter.instance.addEventObserver(ESSArrows.UPDATE_MODEL_FINISHED, this, (arrow, poster, data) -> {
+            ThreadUtil.startUIThread(0, this::reload);
         });
 
         EventCenter.instance.addEventObserver(ESSArrows.EDIT_NAME, this, (arrow, poster, data) -> {
-            RoomBean roomBean = (RoomBean) data.get("roomBean");
-            showEditNamePopup(roomBean);
+            ModelWrapperItemBean modelWrapperItemBean = (ModelWrapperItemBean) data.get("modelWrapperItemBean");
+            showEditNamePopup(modelWrapperItemBean);
         });
     }
 
@@ -173,44 +172,110 @@ public class ModelListActivity extends BasicPermissionActivity {
     }
 
     private void reload() {
+        showProgress();
+
+        SceneFormModel.instance.requestSearchModel(testToken, "", String.valueOf(0), String.valueOf(10), new SceneFormModel.SceneFormModelDelegate() {
+            @Override
+            public void onResponse(String response) {
+                ILog.iLogDebug(TAG, response);
+
+                try {
+                    if(WebConstants.getIsSuccess(response)) {
+                        JSONArray jsonArray = WebConstants.getList(response);
+
+                        List<ModelWrapperItemBean> modelWrapperItemBeanList = new ArrayList<>();
+                        ModelWrapperItemBean modelWrapperItemBean;
+
+                        for(int i = 0; i < jsonArray.length(); i++) {
+
+                            modelWrapperItemBean = new ModelWrapperItemBean();
+                            modelWrapperItemBean.initWithJSONObject(jsonArray.getJSONObject(i));
+                            modelWrapperItemBeanList.add(modelWrapperItemBean);
+                        }
+
+                        ThreadUtil.startUIThread(0, () -> {
+                            modelListAdapter.reloadList(modelWrapperItemBeanList);
+                        });
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+
+            @Override
+            public void onException(Exception e) {
+                e.printStackTrace();
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+        });
+    }
+
+    private void openDetail() {
+
+        if(roomBean == null) {
+            return;
+        }
+
 
         try {
-
-            String jsonObjectString = "{\"normalVectorOfPlaneX\":\"0.0\",\"normalVectorOfPlaneY\":\"-3.9670887\",\"normalVectorOfPlaneZ\":\"0.0\",\"floor\":{\"pointArray\":[{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},\"endPoint\":{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},\"length\":\"0.7784842\"},{\"startPoint\":{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},\"endPoint\":{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},\"length\":\"0.83856905\"},{\"startPoint\":{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},\"endPoint\":{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},\"length\":\"0.7710482\"},{\"startPoint\":{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},\"endPoint\":{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},\"length\":\"0.86519396\"},{\"startPoint\":{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},\"endPoint\":{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},\"length\":\"0.8030845\"},{\"startPoint\":{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},\"endPoint\":{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},\"length\":\"0.2823022\"}],\"type\":\"FLOOR\",\"objectOnIndex\":-1},\"ceiling\":{\"pointArray\":[{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},\"endPoint\":{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},\"length\":\"0.77848417\"},{\"startPoint\":{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},\"endPoint\":{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},\"length\":\"0.83856916\"},{\"startPoint\":{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},\"endPoint\":{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},\"length\":\"0.7710482\"},{\"startPoint\":{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},\"endPoint\":{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},\"length\":\"0.86519384\"},{\"startPoint\":{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},\"endPoint\":{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"},\"length\":\"0.80308455\"},{\"startPoint\":{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"},\"endPoint\":{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},\"length\":\"0.2823022\"}],\"type\":\"CEILING\",\"objectOnIndex\":-1},\"wallArray\":[{\"pointArray\":[{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},\"endPoint\":{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},\"length\":\"0.7784842\"},{\"startPoint\":{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},\"endPoint\":{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},\"length\":\"1.2500002\"},{\"startPoint\":{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},\"endPoint\":{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},\"length\":\"0.77848417\"},{\"startPoint\":{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},\"endPoint\":{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},\"length\":\"1.25\"}],\"type\":\"WALL\",\"objectOnIndex\":-1},{\"pointArray\":[{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},\"endPoint\":{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},\"length\":\"0.83856905\"},{\"startPoint\":{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},\"endPoint\":{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},\"length\":\"1.25\"},{\"startPoint\":{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},\"endPoint\":{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},\"length\":\"0.83856916\"},{\"startPoint\":{\"x\":\"-0.5171293\",\"y\":\"1.2499461\",\"z\":\"-0.5819063\"},\"endPoint\":{\"x\":\"-0.5171293\",\"y\":\"-5.3942204E-5\",\"z\":\"-0.5819063\"},\"length\":\"1.2500002\"}],\"type\":\"WALL\",\"objectOnIndex\":-1},{\"pointArray\":[{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},\"endPoint\":{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},\"length\":\"0.7710482\"},{\"startPoint\":{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},\"endPoint\":{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},\"length\":\"1.25\"},{\"startPoint\":{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},\"endPoint\":{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},\"length\":\"0.7710482\"},{\"startPoint\":{\"x\":\"-0.11315587\",\"y\":\"1.2457612\",\"z\":\"-1.3167439\"},\"endPoint\":{\"x\":\"-0.11315587\",\"y\":\"-0.0042389035\",\"z\":\"-1.3167439\"},\"length\":\"1.25\"}],\"type\":\"WALL\",\"objectOnIndex\":-1},{\"pointArray\":[{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},\"endPoint\":{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},\"length\":\"0.86519396\"},{\"startPoint\":{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},\"endPoint\":{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},\"length\":\"1.25\"},{\"startPoint\":{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},\"endPoint\":{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},\"length\":\"0.86519384\"},{\"startPoint\":{\"x\":\"0.64567435\",\"y\":\"1.2161283\",\"z\":\"-1.1832751\"},\"endPoint\":{\"x\":\"0.64567435\",\"y\":\"-0.03387165\",\"z\":\"-1.1832751\"},\"length\":\"1.25\"}],\"type\":\"WALL\",\"objectOnIndex\":-1},{\"pointArray\":[{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"},{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},\"endPoint\":{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},\"length\":\"0.8030845\"},{\"startPoint\":{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},\"endPoint\":{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"},\"length\":\"1.2500002\"},{\"startPoint\":{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"},\"endPoint\":{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},\"length\":\"0.80308455\"},{\"startPoint\":{\"x\":\"0.7780203\",\"y\":\"1.2163916\",\"z\":\"-0.3282633\"},\"endPoint\":{\"x\":\"0.7780203\",\"y\":\"-0.033608437\",\"z\":\"-0.3282633\"},\"length\":\"1.25\"}],\"type\":\"WALL\",\"objectOnIndex\":-1},{\"pointArray\":[{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},\"endPoint\":{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},\"length\":\"0.2823022\"},{\"startPoint\":{\"x\":\"0.0\",\"y\":\"0.0\",\"z\":\"0.0\"},\"endPoint\":{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},\"length\":\"1.25\"},{\"startPoint\":{\"x\":\"0.0\",\"y\":\"1.25\",\"z\":\"0.0\"},\"endPoint\":{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"},\"length\":\"0.2823022\"},{\"startPoint\":{\"x\":\"-0.02302806\",\"y\":\"1.2490456\",\"z\":\"-0.28135982\"},\"endPoint\":{\"x\":\"-0.02302806\",\"y\":\"-9.544492E-4\",\"z\":\"-0.28135982\"},\"length\":\"1.2500002\"}],\"type\":\"WALL\",\"objectOnIndex\":-1}],\"wallObjectArray\":[{\"pointArray\":[{\"x\":\"-0.27837884\",\"y\":\"0.8662507\",\"z\":\"-0.31325102\"},{\"x\":\"-0.038723323\",\"y\":\"0.8610536\",\"z\":\"-0.053757608\"},{\"x\":\"-0.045541458\",\"y\":\"0.6716971\",\"z\":\"-0.05125308\"},{\"x\":\"-0.285197\",\"y\":\"0.6768941\",\"z\":\"-0.3107465\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"-0.27837884\",\"y\":\"0.8662507\",\"z\":\"-0.31325102\"},\"endPoint\":{\"x\":\"-0.038723323\",\"y\":\"0.8610536\",\"z\":\"-0.053757608\"},\"length\":\"0.35326844\"},{\"startPoint\":{\"x\":\"-0.038723323\",\"y\":\"0.8610536\",\"z\":\"-0.053757608\"},\"endPoint\":{\"x\":\"-0.045541458\",\"y\":\"0.6716971\",\"z\":\"-0.05125308\"},\"length\":\"0.18949574\"},{\"startPoint\":{\"x\":\"-0.045541458\",\"y\":\"0.6716971\",\"z\":\"-0.05125308\"},\"endPoint\":{\"x\":\"-0.285197\",\"y\":\"0.6768941\",\"z\":\"-0.3107465\"},\"length\":\"0.35326844\"},{\"startPoint\":{\"x\":\"-0.285197\",\"y\":\"0.6768941\",\"z\":\"-0.3107465\"},\"endPoint\":{\"x\":\"-0.27837884\",\"y\":\"0.8662507\",\"z\":\"-0.31325102\"},\"length\":\"0.1894958\"}],\"type\":\"WINDOW\",\"objectOnIndex\":0},{\"pointArray\":[{\"x\":\"-0.3407782\",\"y\":\"0.45481724\",\"z\":\"-0.38346422\"},{\"x\":\"-0.08652692\",\"y\":\"0.44926023\",\"z\":\"-0.11145434\"},{\"x\":\"-0.095966645\",\"y\":\"0.18709564\",\"z\":\"-0.10798681\"},{\"x\":\"-0.35021797\",\"y\":\"0.1926527\",\"z\":\"-0.37999672\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"-0.3407782\",\"y\":\"0.45481724\",\"z\":\"-0.38346422\"},\"endPoint\":{\"x\":\"-0.08652692\",\"y\":\"0.44926023\",\"z\":\"-0.11145434\"},\"length\":\"0.3723761\"},{\"startPoint\":{\"x\":\"-0.08652692\",\"y\":\"0.44926023\",\"z\":\"-0.11145434\"},\"endPoint\":{\"x\":\"-0.095966645\",\"y\":\"0.18709564\",\"z\":\"-0.10798681\"},\"length\":\"0.26235738\"},{\"startPoint\":{\"x\":\"-0.095966645\",\"y\":\"0.18709564\",\"z\":\"-0.10798681\"},\"endPoint\":{\"x\":\"-0.35021797\",\"y\":\"0.1926527\",\"z\":\"-0.37999672\"},\"length\":\"0.37237617\"},{\"startPoint\":{\"x\":\"-0.35021797\",\"y\":\"0.1926527\",\"z\":\"-0.37999672\"},\"endPoint\":{\"x\":\"-0.3407782\",\"y\":\"0.45481724\",\"z\":\"-0.38346422\"},\"length\":\"0.26235732\"}],\"type\":\"WINDOW\",\"objectOnIndex\":0},{\"pointArray\":[{\"x\":\"0.10962978\",\"y\":\"0.8361199\",\"z\":\"-0.28914434\"},{\"x\":\"0.49427593\",\"y\":\"0.8218517\",\"z\":\"-0.32076973\"},{\"x\":\"0.46474317\",\"y\":\"0.0016527772\",\"z\":\"-0.30992132\"},{\"x\":\"0.08009699\",\"y\":\"0.015920997\",\"z\":\"-0.278296\"}],\"segmentArray\":[{\"startPoint\":{\"x\":\"0.10962978\",\"y\":\"0.8361199\",\"z\":\"-0.28914434\"},\"endPoint\":{\"x\":\"0.49427593\",\"y\":\"0.8218517\",\"z\":\"-0.32076973\"},\"length\":\"0.38620773\"},{\"startPoint\":{\"x\":\"0.49427593\",\"y\":\"0.8218517\",\"z\":\"-0.32076973\"},\"endPoint\":{\"x\":\"0.46474317\",\"y\":\"0.0016527772\",\"z\":\"-0.30992132\"},\"length\":\"0.8208021\"},{\"startPoint\":{\"x\":\"0.46474317\",\"y\":\"0.0016527772\",\"z\":\"-0.30992132\"},\"endPoint\":{\"x\":\"0.08009699\",\"y\":\"0.015920997\",\"z\":\"-0.278296\"},\"length\":\"0.38620776\"},{\"startPoint\":{\"x\":\"0.08009699\",\"y\":\"0.015920997\",\"z\":\"-0.278296\"},\"endPoint\":{\"x\":\"0.10962978\",\"y\":\"0.8361199\",\"z\":\"-0.28914434\"},\"length\":\"0.8208021\"}],\"type\":\"DOOR\",\"objectOnIndex\":4}],\"height\":\"1.25\",\"floorFixedY\":\"-0.8456003\",\"area\":\"1.0410913\",\"circumference\":\"4.338682\",\"wallArea\":\"5.4233522\",\"volume\":\"1.3013642\",\"name\":\"ㅈㅈㅈ\",\"unit\":\"m\"}";
-            JSONObject jsonObject = new JSONObject(jsonObjectString);
-
-            RoomBean roomBean = new RoomBean();
-            roomBean.init(jsonObject);
-
-            List<RoomBean> list = new ArrayList<>();
-            list.add(roomBean);
-            modelListAdapter.reloadList(list);
-
-            if(this.roomBean != null) {
-                openDetail();
-            }
+            Bundle bundle = new Bundle();
+            bundle.putString("roomBean", roomBean.toJSONObject().toString());
+            bundle.putBoolean("isNew", true);
+            ActivityUtil.startNewActivityWithoutFinish(this, ModelDetailInfoActivity.class, bundle);
         }
-        catch (JSONException e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void insert() {
-        modelListAdapter.insert(roomBean);
-    }
-
-    private void openDetail() throws JSONException {
-        String string = roomBean.toJSONObject().toString();
-        Bundle bundle = new Bundle();
-        bundle.putString("roomBean", string);
-        ActivityUtil.startNewActivityWithoutFinish(this, ModelDetailInfoActivity.class, bundle);
-    }
-
     private void loadMore() {
+        showProgress();
 
+        SceneFormModel.instance.requestSearchModel(testToken, "", String.valueOf(modelListAdapter.getItemCount()), String.valueOf(10), new SceneFormModel.SceneFormModelDelegate() {
+            @Override
+            public void onResponse(String response) {
+                ILog.iLogDebug(TAG, response);
+
+                try {
+                    if(WebConstants.getIsSuccess(response)) {
+                        JSONArray jsonArray = WebConstants.getList(response);
+
+                        List<ModelWrapperItemBean> modelWrapperItemBeanList = new ArrayList<>();
+                        ModelWrapperItemBean modelWrapperItemBean;
+
+                        for(int i = 0; i < jsonArray.length(); i++) {
+
+                            modelWrapperItemBean = new ModelWrapperItemBean();
+                            modelWrapperItemBean.initWithJSONObject(jsonArray.getJSONObject(i));
+                            modelWrapperItemBeanList.add(modelWrapperItemBean);
+                        }
+
+                        ThreadUtil.startUIThread(0, () -> {
+                            modelListAdapter.loadMoreList(modelWrapperItemBeanList);
+                        });
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+
+            @Override
+            public void onException(Exception e) {
+                e.printStackTrace();
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+        });
     }
 
-    private void showEditNamePopup(RoomBean roomBean) {
+    private void showEditNamePopup(ModelWrapperItemBean modelWrapperItemBean) {
 
         frameLayoutPopup.removeAllViews();
         simpleOneInputTwoBottomPopupViewHolder = new SimpleOneInputTwoBottomPopupViewHolder(this);

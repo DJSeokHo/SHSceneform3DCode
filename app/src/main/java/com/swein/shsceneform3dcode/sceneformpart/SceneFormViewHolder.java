@@ -22,8 +22,6 @@ import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.framework.util.debug.ILog;
-import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.EventCenter;
-import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
 import com.swein.shsceneform3dcode.framework.util.view.ViewUtil;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.model.RoomModel;
@@ -38,12 +36,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 
 public class SceneFormViewHolder {
 
     public interface SceneFormViewHolderDelegate {
         void onLoadModelFinish();
+        void onCaptureFinished(String filePath);
     }
 
     public final static int TYPE_3D = 0;
@@ -420,9 +418,7 @@ public class SceneFormViewHolder {
                             saveBitmapToDisk(bitmap, filePath);
                             ILog.iLogDebug(TAG, filePath);
 
-                            HashMap<String, Object> hashMap = new HashMap<>();
-                            hashMap.put("filePath", filePath);
-                            EventCenter.instance.sendEvent(ESSArrows.UPDATE_2D_IMAGE, this, hashMap);
+                            sceneFormViewHolderDelegate.onCaptureFinished(filePath);
                         }
                         catch (IOException e) {
                             empty.run();

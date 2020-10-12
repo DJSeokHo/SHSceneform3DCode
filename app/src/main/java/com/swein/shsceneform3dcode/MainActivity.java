@@ -36,6 +36,7 @@ public class MainActivity extends FragmentActivity {
                 bundle.putString("roomBean", jsonObjectString);
                 ActivityUtil.startNewActivityWithoutFinish(this, ModelListActivity.class, bundle);
 
+//                ActivityUtil.startNewActivityWithoutFinish(this, ModelListActivity.class);
             }
             catch (Exception e) {
                 e.printStackTrace();
