@@ -412,6 +412,45 @@ public class OKHttpWrapper {
         });
     }
 
+    public void requestPutModelNameWithHeader(String url, HashMap<String, String> header, String modelId, String name, String jsonObj, OKHttpWrapperDelegate okHttpWrapperDelegate) {
+
+        if(okHttpClient == null) {
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            okHttpClient = builder.build();
+        }
+
+        RequestBody requestBody = new FormBody.Builder()
+                .add("modelId", String.valueOf(modelId))
+                .add("name", name)
+                .add("jsonObj", jsonObj)
+                .build();
+
+        Request.Builder builder = new Request.Builder();
+
+        for (Map.Entry<String, String> entry : header.entrySet()) {
+            builder.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        Request request = builder.put(requestBody).url(url).build();
+
+        Call call = okHttpClient.newCall(request);
+
+        // auto  thread
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                okHttpWrapperDelegate.onFailure(call, e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                okHttpWrapperDelegate.onResponse(call, response);
+
+            }
+        });
+    }
+
     public void requestPostImageFile(String url, HashMap<String, String> header, String filePath, OKHttpWrapperDelegate okHttpWrapperDelegate) {
 
         if(okHttpClient == null) {

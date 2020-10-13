@@ -51,4 +51,8 @@ public class WebConstants {
     public static String getDeleteModelUrl(String modelId) {
         return String.format("%s/v1/model/delete?modelId=%s", DOMAIN, modelId);
     }
+
+    public static String getUpdateModelNameUrl() {
+        return String.format("%s/v1/model/modify", DOMAIN);
+    }
 }

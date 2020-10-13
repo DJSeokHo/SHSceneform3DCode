@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.swein.shsceneform3dcode.R;
 import com.swein.shsceneform3dcode.bean.ModelWrapperItemBean;
 import com.swein.shsceneform3dcode.modellist.adapter.item.ModelListItemViewHolder;
-import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,13 +39,25 @@ public class ModelListAdapter extends RecyclerView.Adapter {
 
     }
 
-    public void insert(ModelWrapperItemBean modelWrapperItemBean) {
-        this.modelWrapperItemBeanList.add(modelWrapperItemBean);
-        notifyItemInserted(0);
+    public void update(ModelWrapperItemBean modelWrapperItemBean) {
+        for(int i = modelWrapperItemBeanList.size() - 1; i >= 0; i--) {
+            if(modelWrapperItemBean.id == modelWrapperItemBeanList.get(i).id) {
+                modelWrapperItemBeanList.get(i).name = modelWrapperItemBean.name;
+                modelWrapperItemBeanList.get(i).roomBean.name = modelWrapperItemBean.name;
+                notifyItemChanged(i);
+                return;
+            }
+        }
     }
 
-    public void update(RoomBean roomBean) {
-
+    public void delete(ModelWrapperItemBean modelWrapperItemBean) {
+        for(int i = modelWrapperItemBeanList.size() - 1; i >= 0; i--) {
+            if(modelWrapperItemBean.id == modelWrapperItemBeanList.get(i).id) {
+                modelWrapperItemBeanList.remove(i);
+                notifyItemRemoved(i);
+                return;
+            }
+        }
     }
 
     public void reloadList(List<ModelWrapperItemBean> modelWrapperItemBeanList) {

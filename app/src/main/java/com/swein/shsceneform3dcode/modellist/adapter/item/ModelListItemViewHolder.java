@@ -27,7 +27,7 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
     public ModelWrapperItemBean modelWrapperItemBean;
 
     private TextView textViewName;
-    private ImageView imageViewEditName;
+    private ImageView imageViewMore;
     private ImageView imageView;
 
     private SceneFormViewHolder sceneFormViewHolder;
@@ -42,15 +42,16 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
     private void findView() {
         imageView = view.get().findViewById(R.id.imageView);
         textViewName = view.get().findViewById(R.id.textViewName);
-        imageViewEditName = view.get().findViewById(R.id.imageViewEditName);
+        imageViewMore = view.get().findViewById(R.id.imageViewMore);
     }
 
     private void setListener() {
-        imageViewEditName.setOnClickListener(view -> {
+        imageViewMore.setOnClickListener(view -> {
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("modelWrapperItemBean", modelWrapperItemBean);
+            hashMap.put("fromView", new WeakReference<>(imageViewMore));
 
-            EventCenter.instance.sendEvent(ESSArrows.EDIT_NAME, this, hashMap);
+            EventCenter.instance.sendEvent(ESSArrows.MODEL_ITEM_CLICK_MENU, this, hashMap);
         });
 
         view.get().setOnClickListener(view -> {

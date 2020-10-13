@@ -53,36 +53,6 @@ public class SceneFormModel {
         });
     }
 
-    public void requestUploadImage(String token, String modelId, String filePath, SceneFormModelDelegate sceneFormModelDelegate) {
-        String url = WebConstants.getUploadModelImageUrl(modelId);
-        ILog.iLogDebug(TAG, url);
-
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("X-AUTH-TOKEN", token);
-
-        OKHttpWrapper.instance.requestPostImageFile(url, hashMap, filePath, new OKHttpWrapper.OKHttpWrapperDelegate() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                sceneFormModelDelegate.onException(e);
-                OKHttpWrapper.instance.cancelCall(call);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) {
-                try {
-                    String responseString = OKHttpWrapper.instance.getStringResponse(response);
-                    sceneFormModelDelegate.onResponse(responseString);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-                finally {
-                    OKHttpWrapper.instance.cancelCall(call);
-                }
-            }
-        });
-    }
-
     public void requestSearchModel(String token, String keyWord, String offset, String limitNo, SceneFormModelDelegate sceneFormModelDelegate) {
         String url = WebConstants.getSearchModelUrl(keyWord, offset, limitNo);
 
@@ -123,6 +93,36 @@ public class SceneFormModel {
         hashMap.put("X-AUTH-TOKEN", token);
 
         OKHttpWrapper.instance.requestDeleteWithHeader(url, hashMap, new OKHttpWrapper.OKHttpWrapperDelegate() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                sceneFormModelDelegate.onException(e);
+                OKHttpWrapper.instance.cancelCall(call);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                try {
+                    String responseString = OKHttpWrapper.instance.getStringResponse(response);
+                    sceneFormModelDelegate.onResponse(responseString);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    OKHttpWrapper.instance.cancelCall(call);
+                }
+            }
+        });
+    }
+
+    public void requestUpdateModelName(String token, String modelId, String name, String jsonObj, SceneFormModelDelegate sceneFormModelDelegate) {
+        String url = WebConstants.getUpdateModelNameUrl();
+        ILog.iLogDebug(TAG, url);
+
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put("X-AUTH-TOKEN", token);
+
+        OKHttpWrapper.instance.requestPutModelNameWithHeader(url, hashMap, modelId, name, jsonObj, new OKHttpWrapper.OKHttpWrapperDelegate() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 sceneFormModelDelegate.onException(e);

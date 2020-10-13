@@ -23,8 +23,8 @@
         android:layout_height="wrap_content"/>
 
     <ImageView
-        android:padding="12dp"
-        android:id="@+id/imageViewEditName"
+        android:padding="10dp"
+        android:id="@+id/imageViewMore"
         android:src="@drawable/i_more_point"
         android:scaleType="fitCenter"
         android:layout_marginEnd="10dp"

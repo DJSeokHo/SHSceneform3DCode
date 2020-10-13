@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.PopupMenu;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,6 +33,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,9 +110,10 @@ public class ModelListActivity extends BasicPermissionActivity {
             ThreadUtil.startUIThread(0, this::reload);
         });
 
-        EventCenter.instance.addEventObserver(ESSArrows.EDIT_NAME, this, (arrow, poster, data) -> {
+        EventCenter.instance.addEventObserver(ESSArrows.MODEL_ITEM_CLICK_MENU, this, (arrow, poster, data) -> {
             ModelWrapperItemBean modelWrapperItemBean = (ModelWrapperItemBean) data.get("modelWrapperItemBean");
-            showEditNamePopup(modelWrapperItemBean);
+            WeakReference<View> view = (WeakReference<View>) data.get("fromView");
+            showPopupMenu(view.get(), modelWrapperItemBean);
         });
     }
 
@@ -279,12 +283,20 @@ public class ModelListActivity extends BasicPermissionActivity {
 
         frameLayoutPopup.removeAllViews();
         simpleOneInputTwoBottomPopupViewHolder = new SimpleOneInputTwoBottomPopupViewHolder(this);
-        simpleOneInputTwoBottomPopupViewHolder.setString(roomBean.name);
+        simpleOneInputTwoBottomPopupViewHolder.setString(modelWrapperItemBean.name);
         simpleOneInputTwoBottomPopupViewHolder.simpleOneInputTwoBottomPopupViewHolderDelegate = new SimpleOneInputTwoBottomPopupViewHolder.SimpleOneInputTwoBottomPopupViewHolderDelegate() {
             @Override
             public void onConfirm(String name) {
 
-                // TODO edit name
+                modelWrapperItemBean.name = name;
+                modelWrapperItemBean.roomBean.name = name;
+
+                try {
+                    updateModelItemName(modelWrapperItemBean);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 hideEditNamePopup();
             }
@@ -313,6 +325,106 @@ public class ModelListActivity extends BasicPermissionActivity {
         }
 
         return false;
+    }
+
+    private void showPopupMenu(View fromView, ModelWrapperItemBean modelWrapperItemBean) {
+
+        PopupMenu popupMenu = new PopupMenu(this, fromView);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_scene_form_model_detail_self, popupMenu.getMenu());
+
+        popupMenu.show();
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+
+            switch (item.getItemId()) {
+                case R.id.edit: {
+                    showEditNamePopup(modelWrapperItemBean);
+                    break;
+                }
+                case R.id.delete: {
+                    deleteModelItem(modelWrapperItemBean);
+
+                    break;
+                }
+
+            }
+            return true;
+        });
+        popupMenu.setOnDismissListener(menu -> {
+
+        });
+    }
+
+    private void updateModelItemName(ModelWrapperItemBean modelWrapperItemBean) throws Exception {
+        showProgress();
+
+        SceneFormModel.instance.requestUpdateModelName(testToken,
+                String.valueOf(modelWrapperItemBean.id),
+                modelWrapperItemBean.name,
+                URLDecoder.decode(modelWrapperItemBean.roomBean.toJSONObject().toString(), "UTF-8"),
+                new SceneFormModel.SceneFormModelDelegate() {
+            @Override
+            public void onResponse(String response) {
+
+                ILog.iLogDebug(TAG, response);
+
+                try {
+                    if(WebConstants.getIsSuccess(response)) {
+
+                        ThreadUtil.startUIThread(0, () -> {
+                            if(modelListAdapter != null) {
+                                modelListAdapter.update(modelWrapperItemBean);
+                            }
+                        });
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+
+            @Override
+            public void onException(Exception e) {
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+        });
+
+    }
+
+    private void deleteModelItem(ModelWrapperItemBean modelWrapperItemBean) {
+        showProgress();
+
+        SceneFormModel.instance.requestDeleteModel(testToken, String.valueOf(modelWrapperItemBean.id), new SceneFormModel.SceneFormModelDelegate() {
+            @Override
+            public void onResponse(String response) {
+                ILog.iLogDebug(TAG, response);
+
+                try {
+                    if(WebConstants.getIsSuccess(response)) {
+
+                        ThreadUtil.startUIThread(0, () -> {
+                            if(modelListAdapter != null) {
+                                modelListAdapter.delete(modelWrapperItemBean);
+                            }
+                        });
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+
+            @Override
+            public void onException(Exception e) {
+                e.printStackTrace();
+                ThreadUtil.startUIThread(0, () -> hideProgress());
+            }
+        });
     }
 
     private void showProgress() {

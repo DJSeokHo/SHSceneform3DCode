@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/share"
-        android:title="@string/scene_form_pop_menu_share" />
+        android:id="@+id/edit"
+        android:title="@string/scene_form_change_name" />
 
     <item
         android:id="@+id/delete"

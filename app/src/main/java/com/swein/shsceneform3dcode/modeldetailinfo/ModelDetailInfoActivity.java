@@ -264,22 +264,15 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
                             ThreadUtil.startUIThread(0, () -> captureThumbnailImage());
 
-                        } catch (InterruptedException e) {
+                        }
+                        catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     });
                 }
                 else {
 
-                    ThreadUtil.startThread(() -> {
-                        try {
-                            Thread.sleep(1000);
-                            canExit = true;
-
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                    canExit = true;
                 }
             }
 
@@ -400,35 +393,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
             }
         });
     }
-
-//    private void showPopupMenu(View fromView) {
-//
-//        PopupMenu popupMenu = new PopupMenu(this, fromView);
-//        popupMenu.getMenuInflater().inflate(R.menu.menu_scene_form_model_detail_self, popupMenu.getMenu());
-//
-//        popupMenu.show();
-//
-//        popupMenu.setOnMenuItemClickListener(item -> {
-//
-//            switch (item.getItemId()) {
-//                case R.id.share: {
-//                    showConfirmModelInfoPopup();
-//                    break;
-//                }
-//                case R.id.delete: {
-//                    // TODO
-//                    ILog.iLogDebug(TAG, "delete");
-//
-//                    break;
-//                }
-//
-//            }
-//            return true;
-//        });
-//        popupMenu.setOnDismissListener(menu -> {
-//
-//        });
-//    }
 
     private void showConfirmModelInfoPopup() {
         frameLayoutPopup.removeAllViews();

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SHSceneform3DCode.iml" filepath="$PROJECT_DIR$/.idea/modules/SHSceneform3DCode.iml" group="SHSceneform3DCode" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="SHSceneform3DCode/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SHSceneform3DCode.iml" filepath="$PROJECT_DIR$/.idea/modules/SHSceneform3DCode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/SHSceneform3DCode.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/SHSceneform3DCode.app.iml" />
     </modules>
   </component>
 </project>

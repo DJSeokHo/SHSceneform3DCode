@@ -11,6 +11,7 @@
     <string name="scene_form_unit_m">m</string>
     <string name="scene_form_unit_cm">cm</string>
 
+    <string name="scene_form_change_name">이름변경</string>
 
     <string name="scene_form_model_list_title">측정 기록</string>
 
