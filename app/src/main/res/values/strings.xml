@@ -13,7 +13,8 @@
 
     <string name="scene_form_change_name">이름변경</string>
 
-    <string name="scene_form_model_list_title">측정 기록</string>
+    <string name="scene_form_model_list_title">측정기록</string>
+    <string name="scene_form_model_list_select_title">측정기록 선택</string>
 
     <string name="scene_form_input_length_unit">단위선택</string>
     <string name="scene_form_area_title">면적</string>

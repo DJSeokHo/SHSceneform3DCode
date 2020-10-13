@@ -36,6 +36,7 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ModelListActivity extends BasicPermissionActivity {
@@ -59,7 +60,11 @@ public class ModelListActivity extends BasicPermissionActivity {
     private FrameLayout frameLayoutPopup;
     private SimpleOneInputTwoBottomPopupViewHolder simpleOneInputTwoBottomPopupViewHolder;
 
+    private List<ModelWrapperItemBean> selectedModelWrapperItemBeanList = new ArrayList<>();
+
     private String testToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3OTIiLCJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWF0IjoxNjAwNDI0NTUyLCJleHAiOjE2MzE5NjA1NTJ9.HDiUJ3eepXQLs4OVak7wgF_dgGkNxxOQ4RzY4Vd_XHw";
+
+    private boolean isSelectMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,9 +75,12 @@ public class ModelListActivity extends BasicPermissionActivity {
         ThemeUtil.setWindowStatusBarColor(this, Color.WHITE);
         ThemeUtil.setAndroidNativeLightStatusBar(this, true, false);
 
+        selectedModelWrapperItemBeanList.clear();
+
         checkBundle();
         initESS();
         findView();
+        initView();
         initNavigationBar();
         setListener();
         initList();
@@ -90,6 +98,7 @@ public class ModelListActivity extends BasicPermissionActivity {
     private void checkBundle() {
         Bundle bundle = getIntent().getBundleExtra(ActivityUtil.BUNDLE_KEY);
         if(bundle != null) {
+            isSelectMode = bundle.getBoolean("isSelectMode", false);
             String string = bundle.getString("roomBean", "");
             if(!string.equals("")) {
                 try {
@@ -106,15 +115,41 @@ public class ModelListActivity extends BasicPermissionActivity {
     }
 
     private void initESS() {
+
+        EventCenter.instance.addEventObserver(ESSArrows.SELECT_MODEL_ITEM, this, (arrow, poster, data) -> {
+
+            ModelWrapperItemBean modelWrapperItemBean = (ModelWrapperItemBean) data.get("modelWrapperItemBean");
+            selectedModelWrapperItemBeanList.add(modelWrapperItemBean);
+
+
+        });
+
+        EventCenter.instance.addEventObserver(ESSArrows.UN_SELECT_MODEL_ITEM, this, (arrow, poster, data) -> {
+
+            ModelWrapperItemBean modelWrapperItemBean = (ModelWrapperItemBean) data.get("modelWrapperItemBean");
+            for(int i = selectedModelWrapperItemBeanList.size() - 1; i >= 0; i--) {
+                if(modelWrapperItemBean.id == selectedModelWrapperItemBeanList.get(i).id) {
+                    selectedModelWrapperItemBeanList.remove(i);
+                }
+            }
+
+        });
+
         EventCenter.instance.addEventObserver(ESSArrows.UPDATE_MODEL_FINISHED, this, (arrow, poster, data) -> {
             ThreadUtil.startUIThread(0, this::reload);
         });
 
         EventCenter.instance.addEventObserver(ESSArrows.MODEL_ITEM_CLICK_MENU, this, (arrow, poster, data) -> {
             ModelWrapperItemBean modelWrapperItemBean = (ModelWrapperItemBean) data.get("modelWrapperItemBean");
-            WeakReference<View> view = (WeakReference<View>) data.get("fromView");
-            showPopupMenu(view.get(), modelWrapperItemBean);
+            View view = ((WeakReference<View>) data.get("fromView")).get();
+            showPopupMenu(view, modelWrapperItemBean);
         });
+    }
+
+    private void initView() {
+        if(isSelectMode) {
+            materialButtonPlus.setVisibility(View.GONE);
+        }
     }
 
     private void findView() {
@@ -135,6 +170,26 @@ public class ModelListActivity extends BasicPermissionActivity {
             @Override
             public void onMenu() {
 
+                if(isSelectMode) {
+
+                    // select
+                    if(selectedModelWrapperItemBeanList.isEmpty()) {
+
+                        ILog.iLogDebug(TAG, "empty");
+
+                        return;
+                    }
+
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("selectedModelWrapperItemBeanList", selectedModelWrapperItemBeanList);
+                    EventCenter.instance.sendEvent(ESSArrows.SELECT_MODEL_FINISH, this, hashMap);
+
+                    finish();
+                }
+                else {
+                    // show menu
+                    // TODO
+                }
             }
 
             @Override
@@ -148,7 +203,15 @@ public class ModelListActivity extends BasicPermissionActivity {
             }
         };
 
-        sceneFormNavigationBarViewHolder.setTitle(getString(R.string.scene_form_model_list_title));
+        if(isSelectMode) {
+            sceneFormNavigationBarViewHolder.setTitle(getString(R.string.scene_form_model_list_select_title));
+            sceneFormNavigationBarViewHolder.setLeft(R.drawable.i_check);
+        }
+        else {
+            sceneFormNavigationBarViewHolder.setTitle(getString(R.string.scene_form_model_list_title));
+            sceneFormNavigationBarViewHolder.setLeft(R.drawable.i_menu);
+        }
+
 
         frameLayoutNavigationBar.addView(sceneFormNavigationBarViewHolder.getView());
     }
@@ -168,6 +231,7 @@ public class ModelListActivity extends BasicPermissionActivity {
         ILog.iLogDebug(TAG, "initList");
 
         modelListAdapter = new ModelListAdapter();
+        modelListAdapter.isSelectMode = isSelectMode;
         modelListAdapter.modelListAdapterDelegate = this::loadMore;
         layoutManager = new LinearLayoutManager(this);
 

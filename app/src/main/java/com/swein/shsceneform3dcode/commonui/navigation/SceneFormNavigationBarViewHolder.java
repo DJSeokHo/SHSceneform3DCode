@@ -47,6 +47,10 @@ public class SceneFormNavigationBarViewHolder {
         imageViewClose.setOnClickListener(view -> sceneFormNavigationBarViewHolderDelegate.onClose());
     }
 
+    public void setLeft(int resource) {
+        imageViewMenu.setImageResource(resource);
+    }
+
     public void setTitle(String title) {
         textViewTitle.setText(title);
     }

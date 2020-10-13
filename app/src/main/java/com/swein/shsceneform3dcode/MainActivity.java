@@ -36,7 +36,9 @@ public class MainActivity extends FragmentActivity {
 //                bundle.putString("roomBean", jsonObjectString);
 //                ActivityUtil.startNewActivityWithoutFinish(this, ModelListActivity.class, bundle);
 
-                ActivityUtil.startNewActivityWithoutFinish(this, ModelListActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("isSelectMode", true);
+                ActivityUtil.startNewActivityWithoutFinish(this, ModelListActivity.class, bundle);
             }
             catch (Exception e) {
                 e.printStackTrace();

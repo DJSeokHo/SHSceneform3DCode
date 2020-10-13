@@ -2,6 +2,7 @@ package com.swein.shsceneform3dcode.modellist.adapter.item;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,13 +23,17 @@ import java.util.HashMap;
 
 public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
 
+    private final static String TAG = "ModelListItemViewHolder";
+
     private WeakReference<View> view;
 
     public ModelWrapperItemBean modelWrapperItemBean;
+    public boolean isSelectMode = false;
 
     private TextView textViewName;
     private ImageView imageViewMore;
     private ImageView imageView;
+    private CheckBox checkbox;
 
     private SceneFormViewHolder sceneFormViewHolder;
 
@@ -43,6 +48,7 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
         imageView = view.get().findViewById(R.id.imageView);
         textViewName = view.get().findViewById(R.id.textViewName);
         imageViewMore = view.get().findViewById(R.id.imageViewMore);
+        checkbox = view.get().findViewById(R.id.checkbox);
     }
 
     private void setListener() {
@@ -67,16 +73,39 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
             }
 
         });
+
+        checkbox.setOnCheckedChangeListener((compoundButton, b) -> {
+
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("modelWrapperItemBean", modelWrapperItemBean);
+
+            if(b) {
+                EventCenter.instance.sendEvent(ESSArrows.SELECT_MODEL_ITEM, this, hashMap);
+            }
+            else {
+                EventCenter.instance.sendEvent(ESSArrows.UN_SELECT_MODEL_ITEM, this, hashMap);
+            }
+        });
     }
 
     public void updateView() {
+
+        if(isSelectMode) {
+            checkbox.setVisibility(View.VISIBLE);
+        }
+        else {
+            checkbox.setVisibility(View.GONE);
+        }
 
         textViewName.setText(modelWrapperItemBean.name);
 
         if(!modelWrapperItemBean.imgUrl.equals("")) {
             imageView.post(() -> SHGlide.instance.setImageBitmap(view.get().getContext(), modelWrapperItemBean.imgUrl, imageView, null, imageView.getWidth(), imageView.getHeight(), 0f, 0f));
         }
+    }
 
+    private boolean getIsChecked() {
+        return checkbox.isChecked();
     }
 
     @Override

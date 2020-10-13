@@ -32,6 +32,12 @@
         android:layout_width="40dp"
         android:layout_height="40dp"/>
 
+    <CheckBox
+        android:layout_margin="4dp"
+        android:id="@+id/checkbox"
+        android:layout_width="30dp"
+        android:layout_height="30dp"/>
+
     <View
         android:layout_gravity="bottom"
         android:layout_marginStart="15dp"

@@ -26,6 +26,8 @@ public class ModelListAdapter extends RecyclerView.Adapter {
 
     public ModelListAdapterDelegate modelListAdapterDelegate;
 
+    public boolean isSelectMode = false;
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -73,6 +75,7 @@ public class ModelListAdapter extends RecyclerView.Adapter {
         if (holder instanceof ModelListItemViewHolder) {
             ModelListItemViewHolder modelListItemViewHolder = (ModelListItemViewHolder) holder;
             modelListItemViewHolder.modelWrapperItemBean = modelWrapperItemBeanList.get(position);
+            modelListItemViewHolder.isSelectMode = isSelectMode;
             modelListItemViewHolder.updateView();
         }
 
