@@ -3,7 +3,10 @@ package com.swein.shsceneform3dcode.modellist;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,6 +25,7 @@ import com.swein.shsceneform3dcode.framework.util.animation.AnimationUtil;
 import com.swein.shsceneform3dcode.framework.util.debug.ILog;
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.eventcenter.EventCenter;
 import com.swein.shsceneform3dcode.framework.util.eventsplitshot.subject.ESSArrows;
+import com.swein.shsceneform3dcode.framework.util.keyboard.KeyboardUtil;
 import com.swein.shsceneform3dcode.framework.util.theme.ThemeUtil;
 import com.swein.shsceneform3dcode.framework.util.thread.ThreadUtil;
 import com.swein.shsceneform3dcode.model.SceneFormModel;
@@ -50,6 +54,9 @@ public class ModelListActivity extends BasicPermissionActivity {
 
     private FrameLayout frameLayoutProgress;
 
+    private EditText editTextSearchWord;
+    private ImageView imageViewSearch;
+
     private SceneFormNavigationBarViewHolder sceneFormNavigationBarViewHolder;
     private FrameLayout frameLayoutNavigationBar;
 
@@ -65,6 +72,8 @@ public class ModelListActivity extends BasicPermissionActivity {
     private String testToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3OTIiLCJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWF0IjoxNjAwNDI0NTUyLCJleHAiOjE2MzE5NjA1NTJ9.HDiUJ3eepXQLs4OVak7wgF_dgGkNxxOQ4RzY4Vd_XHw";
 
     private boolean isSelectMode = false;
+
+    private String searchString = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +130,7 @@ public class ModelListActivity extends BasicPermissionActivity {
             ModelWrapperItemBean modelWrapperItemBean = (ModelWrapperItemBean) data.get("modelWrapperItemBean");
             selectedModelWrapperItemBeanList.add(modelWrapperItemBean);
 
+            ILog.iLogDebug(TAG, selectedModelWrapperItemBeanList.size());
 
         });
 
@@ -132,6 +142,8 @@ public class ModelListActivity extends BasicPermissionActivity {
                     selectedModelWrapperItemBeanList.remove(i);
                 }
             }
+
+            ILog.iLogDebug(TAG, selectedModelWrapperItemBeanList.size());
 
         });
 
@@ -162,6 +174,9 @@ public class ModelListActivity extends BasicPermissionActivity {
         materialButtonPlus = findViewById(R.id.materialButtonPlus);
 
         frameLayoutPopup = findViewById(R.id.frameLayoutPopup);
+
+        editTextSearchWord = findViewById(R.id.editTextSearchWord);
+        imageViewSearch = findViewById(R.id.imageViewSearch);
     }
 
     private void initNavigationBar() {
@@ -193,11 +208,6 @@ public class ModelListActivity extends BasicPermissionActivity {
             }
 
             @Override
-            public void onSearch() {
-
-            }
-
-            @Override
             public void onClose() {
                 onBackPressed();
             }
@@ -224,6 +234,37 @@ public class ModelListActivity extends BasicPermissionActivity {
 
         materialButtonPlus.setOnClickListener(view -> {
             ILog.iLogDebug(TAG, "add");
+
+        });
+
+        imageViewSearch.setOnClickListener(view -> {
+
+            searchString = editTextSearchWord.getText().toString().trim();
+
+            KeyboardUtil.dismissKeyboardForView(this, editTextSearchWord);
+
+            editTextSearchWord.clearFocus();
+            imageViewSearch.requestFocus();
+
+            reload();
+
+        });
+
+        editTextSearchWord.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if (i == EditorInfo.IME_ACTION_SEARCH) {
+
+                searchString = editTextSearchWord.getText().toString().trim();
+
+                KeyboardUtil.dismissKeyboardForView(this, editTextSearchWord);
+
+                editTextSearchWord.clearFocus();
+                imageViewSearch.requestFocus();
+
+                reload();
+
+                return true;
+            }
+            return false;
         });
     }
 
@@ -240,9 +281,12 @@ public class ModelListActivity extends BasicPermissionActivity {
     }
 
     private void reload() {
+
+        selectedModelWrapperItemBeanList.clear();
+
         showProgress();
 
-        SceneFormModel.instance.requestSearchModel(testToken, "", String.valueOf(0), String.valueOf(10), new SceneFormModel.SceneFormModelDelegate() {
+        SceneFormModel.instance.requestSearchModel(testToken, searchString, String.valueOf(0), String.valueOf(10), new SceneFormModel.SceneFormModelDelegate() {
             @Override
             public void onResponse(String response) {
                 ILog.iLogDebug(TAG, response);
@@ -303,7 +347,7 @@ public class ModelListActivity extends BasicPermissionActivity {
     private void loadMore() {
         showProgress();
 
-        SceneFormModel.instance.requestSearchModel(testToken, "", String.valueOf(modelListAdapter.getItemCount()), String.valueOf(10), new SceneFormModel.SceneFormModelDelegate() {
+        SceneFormModel.instance.requestSearchModel(testToken, searchString, String.valueOf(modelListAdapter.getItemCount()), String.valueOf(10), new SceneFormModel.SceneFormModelDelegate() {
             @Override
             public void onResponse(String response) {
                 ILog.iLogDebug(TAG, response);

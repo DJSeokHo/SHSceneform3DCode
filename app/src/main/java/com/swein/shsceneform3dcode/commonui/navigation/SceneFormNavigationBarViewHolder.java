@@ -12,18 +12,15 @@ public class SceneFormNavigationBarViewHolder {
 
     public interface SceneFormNavigationBarViewHolderDelegate {
         void onMenu();
-        void onSearch();
         void onClose();
     }
 
     private View view;
 
     private ImageView imageViewMenu;
-    private ImageView imageViewSearch;
     private ImageView imageViewClose;
 
     private TextView textViewTitle;
-    private View viewBottomLine;
 
     public SceneFormNavigationBarViewHolderDelegate sceneFormNavigationBarViewHolderDelegate;
 
@@ -35,15 +32,12 @@ public class SceneFormNavigationBarViewHolder {
 
     private void findView() {
         imageViewMenu = view.findViewById(R.id.imageViewMenu);
-        imageViewSearch = view.findViewById(R.id.imageViewSearch);
         imageViewClose = view.findViewById(R.id.imageViewClose);
         textViewTitle = view.findViewById(R.id.textViewTitle);
-        viewBottomLine = view.findViewById(R.id.viewBottomLine);
     }
 
     private void setListener() {
         imageViewMenu.setOnClickListener(view -> sceneFormNavigationBarViewHolderDelegate.onMenu());
-        imageViewSearch.setOnClickListener(view -> sceneFormNavigationBarViewHolderDelegate.onSearch());
         imageViewClose.setOnClickListener(view -> sceneFormNavigationBarViewHolderDelegate.onClose());
     }
 
@@ -59,8 +53,5 @@ public class SceneFormNavigationBarViewHolder {
         return view;
     }
 
-    public void hideBottomLine() {
-        viewBottomLine.setVisibility(View.GONE);
-    }
 
 }

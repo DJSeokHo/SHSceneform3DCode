@@ -90,6 +90,8 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
 
     public void updateView() {
 
+        checkbox.setChecked(false);
+
         if(isSelectMode) {
             checkbox.setVisibility(View.VISIBLE);
         }
