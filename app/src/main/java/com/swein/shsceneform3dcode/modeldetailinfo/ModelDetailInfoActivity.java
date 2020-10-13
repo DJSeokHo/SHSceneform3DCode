@@ -55,7 +55,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
     private RoomBean roomBean;
     private boolean isNew = false;
-
+    private String imageUrl = "";
 
     private CustomHorizontalScrollViewDisableTouch horizontalScrollView;
 
@@ -117,6 +117,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         if(bundle != null) {
 
             isNew = bundle.getBoolean("isNew", false);
+            imageUrl = bundle.getString("imageUrl", "");
 
             String roomBeanJSONObjectString = bundle.getString("roomBean", "");
             if(roomBeanJSONObjectString.equals("")) {
@@ -365,6 +366,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
     private void uploadModel(String filePath) throws Exception {
         showProgress();
+        // TODO response get imageurl and id and set to roomBean
 
         SceneFormModel.instance.requestUploadModel(testToken, roomBean.name,
                 URLEncoder.encode(roomBean.toJSONObject().toString(), "UTF-8"), filePath, new SceneFormModel.SceneFormModelDelegate() {
@@ -398,22 +400,7 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         frameLayoutPopup.removeAllViews();
         confirmModelInfoShareViewHolder = new ConfirmModelInfoShareViewHolder(this);
         confirmModelInfoShareViewHolder.roomBean = roomBean;
-        confirmModelInfoShareViewHolder.confirmModelInfoPopupViewHolderDelegate = new ConfirmModelInfoShareViewHolder.ConfirmModelInfoPopupViewHolderDelegate() {
-            @Override
-            public void onImage() {
-
-            }
-
-            @Override
-            public void onPdf() {
-
-            }
-
-            @Override
-            public void onClose() {
-                hideConfirmModelInfoPopup();
-            }
-        };
+        confirmModelInfoShareViewHolder.confirmModelInfoPopupViewHolderDelegate = this::hideConfirmModelInfoPopup;
 
         confirmModelInfoShareViewHolder.updateView();
         frameLayoutPopup.addView(confirmModelInfoShareViewHolder.getView());

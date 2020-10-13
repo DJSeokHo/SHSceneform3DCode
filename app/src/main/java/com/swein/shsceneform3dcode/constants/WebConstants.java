@@ -40,10 +40,6 @@ public class WebConstants {
         return String.format("%s/v1/model/new", DOMAIN);
     }
 
-    public static String getUploadModelImageUrl(String modelId) {
-        return String.format("%s/v1/model/imgupload?modelId=%s", DOMAIN, modelId);
-    }
-
     public static String getSearchModelUrl(String keyWord, String offset, String limitNo) {
         return String.format("%s/v1/search/model?keyWord=%s&offset=%s&limitNo=%s", DOMAIN, keyWord, offset, limitNo);
     }

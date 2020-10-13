@@ -22,8 +22,6 @@ import java.util.List;
 public class ConfirmModelInfoShareViewHolder {
 
     public interface ConfirmModelInfoPopupViewHolderDelegate {
-        void onImage();
-        void onPdf();
         void onClose();
     }
 
@@ -80,6 +78,14 @@ public class ConfirmModelInfoShareViewHolder {
 
         imageViewPDF.setOnClickListener(view -> {
 
+            List<View> viewList = new ArrayList<>();
+            viewList.add(linearLayoutPrint);
+            String pdfPath = DeviceUtil.createPdf(viewList, linearLayoutPrint, roomBean.name);
+
+            DeviceUtil.shareFile(view.getContext(), pdfPath,
+                    view.getContext().getString(R.string.scene_form_two_d),
+                    view.getContext().getString(R.string.scene_form_two_d),
+                    view.getContext().getString(R.string.scene_form_pop_menu_share));
         });
     }
 

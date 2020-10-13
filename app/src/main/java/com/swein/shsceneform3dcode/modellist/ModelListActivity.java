@@ -290,7 +290,7 @@ public class ModelListActivity extends BasicPermissionActivity {
         SceneFormModel.instance.requestSearchModel(testToken, searchString, String.valueOf(0), String.valueOf(10), new SceneFormModel.SceneFormModelDelegate() {
             @Override
             public void onResponse(String response) {
-                ILog.iLogDebug(TAG, response);
+//                ILog.iLogDebug(TAG, response);
 
                 try {
                     if(WebConstants.getIsSuccess(response)) {
@@ -306,15 +306,12 @@ public class ModelListActivity extends BasicPermissionActivity {
                             modelWrapperItemBeanList.add(modelWrapperItemBean);
                         }
 
-                        ThreadUtil.startUIThread(0, () -> {
-                            modelListAdapter.reloadList(modelWrapperItemBeanList);
-                        });
+                        ThreadUtil.startUIThread(0, () -> modelListAdapter.reloadList(modelWrapperItemBeanList));
                     }
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                 }
-
 
                 ThreadUtil.startUIThread(0, () -> hideProgress());
             }
@@ -332,7 +329,6 @@ public class ModelListActivity extends BasicPermissionActivity {
         if(roomBean == null) {
             return;
         }
-
 
         try {
             Bundle bundle = new Bundle();
@@ -367,9 +363,7 @@ public class ModelListActivity extends BasicPermissionActivity {
                             modelWrapperItemBeanList.add(modelWrapperItemBean);
                         }
 
-                        ThreadUtil.startUIThread(0, () -> {
-                            modelListAdapter.loadMoreList(modelWrapperItemBeanList);
-                        });
+                        ThreadUtil.startUIThread(0, () -> modelListAdapter.loadMoreList(modelWrapperItemBeanList));
                     }
                 }
                 catch (Exception e) {
@@ -452,13 +446,13 @@ public class ModelListActivity extends BasicPermissionActivity {
                 }
                 case R.id.delete: {
                     deleteModelItem(modelWrapperItemBean);
-
                     break;
                 }
 
             }
             return true;
         });
+
         popupMenu.setOnDismissListener(menu -> {
 
         });
