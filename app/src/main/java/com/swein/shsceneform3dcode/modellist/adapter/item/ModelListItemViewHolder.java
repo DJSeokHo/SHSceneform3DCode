@@ -94,9 +94,11 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
 
         if(isSelectMode) {
             checkbox.setVisibility(View.VISIBLE);
+            imageViewMore.setVisibility(View.GONE);
         }
         else {
             checkbox.setVisibility(View.GONE);
+            imageViewMore.setVisibility(View.VISIBLE);
         }
 
         textViewName.setText(modelWrapperItemBean.name);

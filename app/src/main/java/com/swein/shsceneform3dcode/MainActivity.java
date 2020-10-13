@@ -37,7 +37,7 @@ public class MainActivity extends FragmentActivity {
 //                ActivityUtil.startNewActivityWithoutFinish(this, ModelListActivity.class, bundle);
 
                 Bundle bundle = new Bundle();
-                bundle.putBoolean("isSelectMode", true);
+                bundle.putBoolean("isSelectMode", false);
                 ActivityUtil.startNewActivityWithoutFinish(this, ModelListActivity.class, bundle);
             }
             catch (Exception e) {

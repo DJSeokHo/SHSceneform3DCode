@@ -45,6 +45,10 @@ public class SceneFormNavigationBarViewHolder {
         imageViewMenu.setImageResource(resource);
     }
 
+    public void hideLeft() {
+        imageViewMenu.setVisibility(View.GONE);
+    }
+
     public void setTitle(String title) {
         textViewTitle.setText(title);
     }

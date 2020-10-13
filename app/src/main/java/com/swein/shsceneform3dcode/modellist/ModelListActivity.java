@@ -219,7 +219,8 @@ public class ModelListActivity extends BasicPermissionActivity {
         }
         else {
             sceneFormNavigationBarViewHolder.setTitle(getString(R.string.scene_form_model_list_title));
-            sceneFormNavigationBarViewHolder.setLeft(R.drawable.i_menu);
+//            sceneFormNavigationBarViewHolder.setLeft(R.drawable.i_menu);
+            sceneFormNavigationBarViewHolder.hideLeft();
         }
 
 
