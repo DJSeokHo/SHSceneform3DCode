@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ModelListActivity extends BasicPermissionActivity {
+public class  ModelListActivity extends BasicPermissionActivity {
 
     private final static String TAG = "ModelListActivity";
 

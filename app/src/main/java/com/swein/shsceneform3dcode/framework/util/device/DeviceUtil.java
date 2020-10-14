@@ -79,7 +79,7 @@ public class DeviceUtil {
             String mPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
                     + "/Trieber/" + android.text.format.DateFormat.format("yyyyMMddHHmmss", now).toString() + ".jpg";
             */
-            String mPath = null;
+            String mPath;
             File dir_screenshots = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),"Screenshots");
             File dir_camera = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),"Camera");
 
@@ -121,16 +121,19 @@ public class DeviceUtil {
             PdfDocument document = new PdfDocument();
 
             // init pdf as A4 size paper
-            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(defaultSizeView.getWidth(), defaultSizeView.getWidth() * 297/210, 1).create();
+//            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(defaultSizeView.getWidth(), defaultSizeView.getWidth() * 297/210, 1).create();
+
+            // init pdf as view size
+            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(defaultSizeView.getWidth(), defaultSizeView.getHeight(), 1).create();
 
             PdfDocument.Page page;
-            for(View view : viewList ) {
+            for(View view : viewList) {
                 page = document.startPage(pageInfo);
                 view.draw(page.getCanvas());
                 document.finishPage(page);
             }
 
-            String mPath = null;
+            String mPath;
             File dir_screenshots = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),"Screenshots");
             File dir_camera = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),"Camera");
 

@@ -66,7 +66,6 @@ public class ModelListItemViewHolder extends RecyclerView.ViewHolder {
                 Bundle bundle = new Bundle();
                 bundle.putString("roomBean", modelWrapperItemBean.roomBean.toJSONObject().toString());
                 bundle.putBoolean("isNew", false);
-                bundle.putString("imageUrl", modelWrapperItemBean.imgUrl);
                 ActivityUtil.startNewActivityWithoutFinish(view.getContext(), ModelDetailInfoActivity.class, bundle);
             }
             catch (Exception e) {

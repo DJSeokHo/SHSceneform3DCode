@@ -1,7 +1,5 @@
 package com.swein.shsceneform3dcode.bean;
 
-import android.os.Bundle;
-
 import com.swein.shsceneform3dcode.framework.util.parsing.ParsingUtil;
 import com.swein.shsceneform3dcode.sceneformpart.data.room.bean.RoomBean;
 
@@ -46,52 +44,11 @@ public class ModelWrapperItemBean {
             jsonObj = URLDecoder.decode(jsonObj, "UTF-8");
             roomBean = new RoomBean();
             roomBean.init(new JSONObject(jsonObj));
+            roomBean.thumbnailImage = imgUrl;
         }
         catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
-    public void initWithBundle(Bundle bundle) {
-        id = bundle.getLong("id", 0);
-        userId = bundle.getLong("userId", 0);
-        name = bundle.getString("name", "");
-        imgUrl = bundle.getString("imgUrl", "");
-        jsonObj = bundle.getString("jsonObj", "");
-        isDelete = bundle.getInt("isDelete", 0);
-        createdAt = bundle.getString("createdAt", "");
-        createdBy = bundle.getLong("createdBy", 0);
-        updatedAt = bundle.getString("updatedAt", "");
-        updatedBy = bundle.getLong("updatedBy", 0);
-
-        if(jsonObj.equals("")) {
-            return;
-        }
-
-        try {
-            JSONObject room = new JSONObject(jsonObj);
-            roomBean = new RoomBean();
-            roomBean.init(room);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            roomBean = null;
-        }
-    }
-
-    public Bundle toBundle() {
-        Bundle bundle = new Bundle();
-        bundle.putLong("id", id);
-        bundle.putLong("userId", userId);
-        bundle.putString("name", name);
-        bundle.putString("imgUrl", imgUrl);
-        bundle.putString("jsonObj", jsonObj);
-        bundle.putInt("isDelete", isDelete);
-        bundle.putString("createdAt", createdAt);
-        bundle.putLong("createdBy", createdBy);
-        bundle.putString("updatedAt", updatedAt);
-        bundle.putLong("updatedBy", updatedBy);
-
-        return bundle;
-    }
 }

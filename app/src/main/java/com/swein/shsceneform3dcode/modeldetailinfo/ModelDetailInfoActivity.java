@@ -13,6 +13,7 @@ import android.widget.Spinner;
 import androidx.fragment.app.FragmentActivity;
 
 import com.swein.shsceneform3dcode.R;
+import com.swein.shsceneform3dcode.bean.ModelWrapperItemBean;
 import com.swein.shsceneform3dcode.commonui.customview.CustomHorizontalScrollViewDisableTouch;
 import com.swein.shsceneform3dcode.commonui.navigation.SimpleNavigationBarViewHolder;
 import com.swein.shsceneform3dcode.constants.WebConstants;
@@ -55,7 +56,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
     private RoomBean roomBean;
     private boolean isNew = false;
-    private String imageUrl = "";
 
     private CustomHorizontalScrollViewDisableTouch horizontalScrollView;
 
@@ -117,7 +117,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
         if(bundle != null) {
 
             isNew = bundle.getBoolean("isNew", false);
-            imageUrl = bundle.getString("imageUrl", "");
 
             String roomBeanJSONObjectString = bundle.getString("roomBean", "");
             if(roomBeanJSONObjectString.equals("")) {
@@ -366,7 +365,6 @@ public class ModelDetailInfoActivity extends FragmentActivity {
 
     private void uploadModel(String filePath) throws Exception {
         showProgress();
-        // TODO response get imageurl and id and set to roomBean
 
         SceneFormModel.instance.requestUploadModel(testToken, roomBean.name,
                 URLEncoder.encode(roomBean.toJSONObject().toString(), "UTF-8"), filePath, new SceneFormModel.SceneFormModelDelegate() {
@@ -377,6 +375,12 @@ public class ModelDetailInfoActivity extends FragmentActivity {
                 try {
 
                     if(WebConstants.getIsSuccess(response)) {
+
+                        ModelWrapperItemBean modelWrapperItemBean = new ModelWrapperItemBean();
+                        JSONObject data = WebConstants.getData(response);
+                        modelWrapperItemBean.initWithJSONObject(data);
+                        roomBean = modelWrapperItemBean.roomBean;
+                        roomBean.thumbnailImage = modelWrapperItemBean.imgUrl;
 
                         ThreadUtil.startUIThread(0, () -> EventCenter.instance.sendEvent(ESSArrows.UPDATE_MODEL_FINISHED, this, null));
                     }
