@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Environment;
@@ -93,7 +94,8 @@ public class DeviceUtil {
             }
 
             view.setDrawingCacheEnabled(true);
-            Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+//            Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+            Bitmap bitmap = loadBitmapFromView(view);
             view.setDrawingCacheEnabled(false);
 
             File imageFile = new File(mPath);
@@ -113,6 +115,13 @@ public class DeviceUtil {
             e.printStackTrace();
             return "";
         }
+    }
+
+    private static Bitmap loadBitmapFromView(View v) {
+        Bitmap b = Bitmap.createBitmap(v.getWidth() , v.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        v.draw(c);
+        return b;
     }
 
     public static String createPdf(List<View> viewList, View defaultSizeView, String fileName) {

@@ -4,6 +4,9 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/3630c758792ef7fad6a0f2e5525d0768/jetified-sceneform-ux-1.17.1/AndroidManifest.xml" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/3630c758792ef7fad6a0f2e5525d0768/jetified-sceneform-ux-1.17.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/3630c758792ef7fad6a0f2e5525d0768/jetified-sceneform-ux-1.17.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6d4c0c35277bee511f425b5ecccd73d5/jetified-sceneform-ux-1.17.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6d4c0c35277bee511f425b5ecccd73d5/jetified-sceneform-ux-1.17.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6d4c0c35277bee511f425b5ecccd73d5/jetified-sceneform-ux-1.17.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
