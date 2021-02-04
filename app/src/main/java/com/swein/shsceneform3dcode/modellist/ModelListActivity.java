@@ -69,7 +69,7 @@ public class  ModelListActivity extends BasicPermissionActivity {
 
     private List<ModelWrapperItemBean> selectedModelWrapperItemBeanList = new ArrayList<>();
 
-    private String testToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3OTIiLCJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWF0IjoxNjAwNDI0NTUyLCJleHAiOjE2MzE5NjA1NTJ9.HDiUJ3eepXQLs4OVak7wgF_dgGkNxxOQ4RzY4Vd_XHw";
+    private String testToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4NDkiLCJyb2xlcyI6WyJST0xFX1VTRVIiLCJST0xFX0FETUlOIl0sImlhdCI6MTYxMjQxMTQxNCwiZXhwIjoxNjQzOTQ3NDE0fQ.euw0iWIfXFFzyGse1w0jI1eY7kAMwEQ7EXV3nDpREQI";
 
     private boolean isSelectMode = false;
 

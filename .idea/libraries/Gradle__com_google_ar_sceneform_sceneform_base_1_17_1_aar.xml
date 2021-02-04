@@ -8,6 +8,10 @@
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/bd279c17fa7141dd57be6b4368d49592/jetified-sceneform-base-1.17.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/bd279c17fa7141dd57be6b4368d49592/jetified-sceneform-base-1.17.1/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/bd279c17fa7141dd57be6b4368d49592/jetified-sceneform-base-1.17.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/9acc0dc5ab3318b9bc2ccab1d0c70523/jetified-sceneform-base-1.17.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/85057a1cccea85adf2a074d5b6d3dc64/jetified-sceneform-base-1.17.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/85057a1cccea85adf2a074d5b6d3dc64/jetified-sceneform-base-1.17.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/85057a1cccea85adf2a074d5b6d3dc64/jetified-sceneform-base-1.17.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
